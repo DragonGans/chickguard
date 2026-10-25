@@ -17,7 +17,7 @@ body {
   --cg-muted: #6b7280;
   --cg-accent: #5cb6df;
   --cg-accent-dark: #496d74;
-  --cg-shadow: 0 10px 24px rgba(46, 85, 98, 0.18);
+  --cg-shadow: 0 6px 20px rgba(26, 77, 89, 0.09), 0 2px 4px rgba(26, 77, 89, 0.04);
   --cg-radius-xl: 28px;
   --cg-radius-lg: 24px;
   --cg-font-xs: 0.82rem;
@@ -54,32 +54,7 @@ body.page-log-harian {
   overflow-x: hidden;
 }
 
-@view-transition {
-  navigation: auto;
-}
 
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: var(--cg-page-duration);
-  animation-timing-function: var(--cg-page-ease);
-  transform-origin: center top;
-}
-
-::view-transition-old(root) {
-  animation-name: pageExitFlow;
-}
-
-::view-transition-new(root) {
-  animation-name: pageEnterFlow;
-}
-
-::view-transition-old(root) {
-  z-index: 1;
-}
-
-::view-transition-new(root) {
-  z-index: 2;
-}
 
 
 .logout-modal-backdrop {
@@ -274,7 +249,6 @@ body.page-log-harian {
   box-shadow: 0 4px 20px rgba(77, 109, 120, 0.16);
   padding: 0.75rem 1.1rem;
   margin: 0;
-  animation: topbarFloatIn var(--cg-page-duration) var(--cg-page-ease-soft) both;
 }
 
 .topbar h1 {
@@ -307,17 +281,6 @@ body.page-log-harian {
 
 .content-section {
   padding: 1.2rem;
-  animation: pageShiftIn 0.3s var(--cg-page-ease) both;
-}
-
-.card-soft,
-.table-card,
-.metric-card,
-.status-card,
-.chart-card,
-.log-card,
-.hero-card {
-  animation: sectionCardIn 0.3s var(--cg-page-ease-soft) both;
 }
 
 .page-title {
@@ -938,66 +901,7 @@ body.page-pencahayaan .log-status-close:hover {
   }
 }
 
-@keyframes pageShiftIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-
-@keyframes topbarFloatIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes sectionCardIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pageExitFlow {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  to {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-}
-
-@keyframes pageEnterFlow {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   *,

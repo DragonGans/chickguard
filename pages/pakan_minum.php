@@ -102,9 +102,10 @@ $topbarSubtitle = 'Pantau stok, aksi cepat, dan jadwal pemberian pakan minum';
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/sidebar.css">
+  <link rel="stylesheet" href="../assets/css/topbar.css">
   <link rel="stylesheet" href="../assets/css/pakan_minum.css">
 </head>
-<body class="page-pakan-minum">
+<body class="dashboard-page page-pakan-minum">
   <div class="dashboard-shell d-lg-flex">
     <?php include '../components/sidebar.php'; ?>
     <main class="main-content">

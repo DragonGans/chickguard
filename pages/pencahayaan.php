@@ -93,9 +93,10 @@ $topbarSubtitle = 'Atur mode lampu, status pencahayaan, dan jadwal nyala kandang
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/sidebar.css">
+  <link rel="stylesheet" href="../assets/css/topbar.css">
   <link rel="stylesheet" href="../assets/css/pencahayaan.css">
 </head>
-<body class="page-pencahayaan">
+<body class="dashboard-page page-pencahayaan">
   <div class="dashboard-shell d-lg-flex">
     <?php include '../components/sidebar.php'; ?>
 

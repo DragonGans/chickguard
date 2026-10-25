@@ -5,33 +5,45 @@ $menuItems = [
     [
         'key' => 'dashboard',
         'href' => 'dashboard.php',
-        'icon' => '<i class="bi bi-house-fill"></i>',
+        'icon' => '<i class="bi bi-house-door-fill"></i>',
         'label' => 'Dashboard',
+    ],
+    [
+        'key' => 'aktuator',
+        'href' => 'aktuator.php',
+        'icon' => '<i class="fa-solid fa-sliders"></i>',
+        'label' => 'Kontrol Aktuator',
     ],
     [
         'key' => 'pakan_minum',
         'href' => 'pakan_minum.php',
-        'icon' => '<i class="fa-solid fa-bowl-food"></i>',
-        'label' => 'Pakan Minum',
-    ],
-    [
-        'key' => 'pencahayaan',
-        'href' => 'pencahayaan.php',
-        'icon' => '<i class="bi bi-lightbulb-fill"></i>',
-        'label' => 'Pencahayaan',
+        'icon' => '<i class="fa-solid fa-calendar-check"></i>',
+        'label' => 'Jadwal Pakan',
     ],
     [
         'key' => 'log_harian',
         'href' => 'log_harian.php',
-        'icon' => '<i class="fa-solid fa-note-sticky"></i>',
-        'label' => 'Log Harian',
+        'icon' => '<i class="fa-solid fa-box-archive"></i>',
+        'label' => 'Riwayat Data',
+    ],
+    [
+        'key' => 'pengaturan',
+        'href' => 'pengaturan.php',
+        'icon' => '<i class="fa-solid fa-gear"></i>',
+        'label' => 'Pengaturan',
     ],
 ];
 ?>
 <aside class="sidebar">
   <div class="sidebar-panel">
     <div class="brand-wrap">
-      <img src="../assets/images/branding/logo.png" alt="ChickGuard" class="brand-image">
+      <a href="dashboard.php" class="brand-link-modern d-flex align-items-center gap-2 text-decoration-none">
+        <img src="../assets/images/branding/icon.png" alt="chickgurd" class="brand-icon-main">
+        <div class="brand-meta-wrap">
+          <div class="brand-title-main">chickgurd</div>
+          <div class="brand-sub-main">Smart Chicken Coop IoT</div>
+        </div>
+      </a>
     </div>
 
     <div class="sidebar-nav-wrap">
@@ -46,11 +58,13 @@ $menuItems = [
         <?php endforeach; ?>
       </ul>
 
-      <div class="sidebar-logout">
-        <a class="nav-link logout-link js-open-logout-modal" href="../proses/logout.php">
-          <i class="bi bi-power"></i>
-          <span>Logout</span>
-        </a>
+      <div class="sidebar-bottom-section mt-auto">
+        <div class="sidebar-logout">
+          <a class="nav-link logout-link js-open-logout-modal" href="../proses/logout.php">
+            <i class="bi bi-power"></i>
+            <span>Logout</span>
+          </a>
+        </div>
       </div>
     </div>
   </div>

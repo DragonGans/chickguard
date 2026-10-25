@@ -1,0 +1,228 @@
+/* ChickGuard - Pengaturan Page Modern Styles */
+
+.settings-card {
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  padding: 1.5rem 1.65rem;
+  box-shadow: 0 6px 20px rgba(26, 77, 89, 0.08), 0 2px 4px rgba(26, 77, 89, 0.04);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.settings-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.settings-subtitle {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* User Profile Banner Card */
+.user-banner-card {
+  background: linear-gradient(135deg, #0d9488 0%, #10b981 100%);
+  border-radius: 20px;
+  padding: 1.5rem 1.75rem;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.28);
+  margin-bottom: 1.5rem;
+}
+
+.user-banner-avatar {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 3px solid rgba(255, 255, 255, 0.6);
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.user-banner-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.user-banner-meta {
+  font-size: 0.82rem;
+  opacity: 0.9;
+}
+
+.user-badge-role {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Form inputs & controls */
+.form-group-modern {
+  margin-bottom: 1.1rem;
+}
+
+.form-label-modern {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.form-control-modern {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.65rem 0.95rem;
+  font-size: 0.88rem;
+  font-family: inherit;
+  color: #0f172a;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.form-control-modern:focus {
+  background: #ffffff;
+  border-color: #10b981;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.form-control-modern:disabled,
+.form-control-modern[readonly] {
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.input-group-modern {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-group-modern .form-control-modern {
+  padding-right: 2.75rem;
+}
+
+.btn-toggle-eye {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.35rem;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  transition: color 0.15s ease;
+}
+
+.btn-toggle-eye:hover {
+  color: #0f172a;
+}
+
+.btn-settings-save {
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+}
+
+.btn-settings-save:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+  color: #ffffff;
+}
+
+.btn-settings-secondary {
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-settings-secondary:hover {
+  background: #1e293b;
+  color: #ffffff;
+}
+
+.settings-help-text {
+  font-size: 0.74rem;
+  color: #64748b;
+  margin-top: 0.3rem;
+}
+
+/* Toast */
+.dashboard-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.dashboard-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}

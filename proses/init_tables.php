@@ -2,6 +2,7 @@
 function chickguard_init_tables(mysqli $koneksi): void
 {
     ensure_users_email_column($koneksi);
+    ensure_users_nama_lengkap_column($koneksi);
 
     mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS password_resets (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -45,11 +46,132 @@ function chickguard_init_tables(mysqli $koneksi): void
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
 
+    mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS data_sensor (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        suhu DECIMAL(5,2) NOT NULL,
+        kelembaban DECIMAL(5,2) NOT NULL,
+        cahaya DECIMAL(8,2) NOT NULL DEFAULT 1240,
+        level_air DECIMAL(5,2) NOT NULL DEFAULT 72,
+        recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS actuator_status (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        kipas TINYINT(1) NOT NULL DEFAULT 0,
+        heater TINYINT(1) NOT NULL DEFAULT 0,
+        lampu TINYINT(1) NOT NULL DEFAULT 0,
+        motor_pakan TINYINT(1) NOT NULL DEFAULT 1,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+
+    mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS notifikasi (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        pesan VARCHAR(255) NOT NULL,
+        tipe VARCHAR(20) NOT NULL DEFAULT 'success',
+        waktu_label VARCHAR(50) NOT NULL,
+        is_read TINYINT(1) NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS pengaturan_kandang (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nama_kandang VARCHAR(100) NOT NULL DEFAULT 'Kandang 1 - Utama',
+        suhu_min DECIMAL(5,2) NOT NULL DEFAULT 24.0,
+        suhu_maks DECIMAL(5,2) NOT NULL DEFAULT 34.0,
+        kelembaban_min DECIMAL(5,2) NOT NULL DEFAULT 55.0,
+        kelembaban_maks DECIMAL(5,2) NOT NULL DEFAULT 75.0,
+        cahaya_min DECIMAL(8,2) NOT NULL DEFAULT 500,
+        level_air_min DECIMAL(5,2) NOT NULL DEFAULT 50.0,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+
+    ensure_log_harian_extra_columns($koneksi);
+    seed_actuator_status($koneksi);
+    seed_data_sensor($koneksi);
+    seed_notifikasi($koneksi);
+    seed_pengaturan_kandang($koneksi);
     seed_jadwal_pakan_minum($koneksi);
     seed_jadwal_pencahayaan($koneksi);
     seed_log_harian($koneksi);
     sinkronkan_data_log_harian($koneksi);
     tambah_log_harian_otomatis($koneksi);
+}
+
+function ensure_log_harian_extra_columns(mysqli $koneksi): void
+{
+    $check = mysqli_query($koneksi, "SHOW COLUMNS FROM log_harian LIKE 'cahaya'");
+    if ($check && mysqli_num_rows($check) === 0) {
+        mysqli_query($koneksi, "ALTER TABLE log_harian ADD cahaya DECIMAL(8,2) DEFAULT 1240 AFTER kelembaban");
+    }
+
+    $check = mysqli_query($koneksi, "SHOW COLUMNS FROM log_harian LIKE 'level_air'");
+    if ($check && mysqli_num_rows($check) === 0) {
+        mysqli_query($koneksi, "ALTER TABLE log_harian ADD level_air DECIMAL(5,2) DEFAULT 72 AFTER cahaya");
+    }
+
+    $check = mysqli_query($koneksi, "SHOW COLUMNS FROM jadwal_pakan_minum LIKE 'is_active'");
+    if ($check && mysqli_num_rows($check) === 0) {
+        mysqli_query($koneksi, "ALTER TABLE jadwal_pakan_minum ADD is_active TINYINT(1) DEFAULT 1 AFTER catatan");
+    }
+}
+
+function seed_actuator_status(mysqli $koneksi): void
+{
+    $result = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM actuator_status");
+    $row = mysqli_fetch_assoc($result);
+    if ((int) ($row['total'] ?? 0) === 0) {
+        mysqli_query($koneksi, "INSERT INTO actuator_status (id, kipas, heater, lampu, motor_pakan) VALUES (1, 0, 0, 0, 1)");
+    }
+}
+
+function seed_data_sensor(mysqli $koneksi): void
+{
+    $result = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM data_sensor");
+    $row = mysqli_fetch_assoc($result);
+    if ((int) ($row['total'] ?? 0) === 0) {
+        $now = date('Y-m-d');
+        $samples = [
+            ['15:00:00', 32.6, 68.9, 1260, 73],
+            ['15:10:00', 32.3, 67.1, 1210, 72],
+            ['15:20:00', 31.9, 66.5, 1120, 71],
+            ['15:30:00', 32.1, 67.8, 1180, 72],
+            ['15:40:00', 32.4, 68.2, 1240, 72],
+        ];
+        $stmt = mysqli_prepare($koneksi, "INSERT INTO data_sensor (suhu, kelembaban, cahaya, level_air, recorded_at) VALUES (?, ?, ?, ?, ?)");
+        foreach ($samples as $s) {
+            $ts = $now . ' ' . $s[0];
+            mysqli_stmt_bind_param($stmt, "dddds", $s[1], $s[2], $s[3], $s[4], $ts);
+            mysqli_stmt_execute($stmt);
+        }
+    }
+}
+
+function seed_notifikasi(mysqli $koneksi): void
+{
+    $result = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM notifikasi");
+    $row = mysqli_fetch_assoc($result);
+    if ((int) ($row['total'] ?? 0) === 0) {
+        $notifs = [
+            ['Pakan diberikan otomatis', 'success', '16:00 - 10 Okt 2026'],
+            ['Level air mulai rendah (72%)', 'warning', '14:32 - 10 Okt 2026'],
+            ['Suhu kembali normal', 'success', '12:15 - 10 Okt 2026'],
+            ['ESP32 terhubung', 'success', '08:07 - 10 Okt 2026'],
+        ];
+        $stmt = mysqli_prepare($koneksi, "INSERT INTO notifikasi (pesan, tipe, waktu_label) VALUES (?, ?, ?)");
+        foreach ($notifs as $n) {
+            mysqli_stmt_bind_param($stmt, "sss", $n[0], $n[1], $n[2]);
+            mysqli_stmt_execute($stmt);
+        }
+    }
+}
+
+function seed_pengaturan_kandang(mysqli $koneksi): void
+{
+    $result = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM pengaturan_kandang");
+    $row = mysqli_fetch_assoc($result);
+    if ((int) ($row['total'] ?? 0) === 0) {
+        mysqli_query($koneksi, "INSERT INTO pengaturan_kandang (id, nama_kandang, suhu_min, suhu_maks, kelembaban_min, kelembaban_maks, cahaya_min, level_air_min) VALUES (1, 'Kandang 1 - Utama', 24.0, 34.0, 55.0, 75.0, 500, 50.0)");
+    }
 }
 
 function ensure_users_email_column(mysqli $koneksi): void
@@ -60,6 +182,14 @@ function ensure_users_email_column(mysqli $koneksi): void
     }
 
     mysqli_query($koneksi, "UPDATE users SET email='admin@chickguard.local' WHERE username='admin' AND (email IS NULL OR email='')");
+}
+
+function ensure_users_nama_lengkap_column(mysqli $koneksi): void
+{
+    $result = mysqli_query($koneksi, "SHOW COLUMNS FROM users LIKE 'nama_lengkap'");
+    if ($result && mysqli_num_rows($result) === 0) {
+        mysqli_query($koneksi, "ALTER TABLE users ADD nama_lengkap VARCHAR(100) DEFAULT 'Bima Apriliansyah' AFTER username");
+    }
 }
 
 function seed_jadwal_pakan_minum(mysqli $koneksi): void

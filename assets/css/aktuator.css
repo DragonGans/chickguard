@@ -1,0 +1,185 @@
+﻿/* Kontrol Aktuator Modern Styles */
+
+.actuator-control-bar {
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 6px 20px rgba(26, 77, 89, 0.08), 0 2px 4px rgba(26, 77, 89, 0.04);
+}
+
+.control-bar-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.actuator-card-grid {
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  padding: 1.4rem 1.4rem 1.25rem;
+  box-shadow: 0 6px 20px rgba(26, 77, 89, 0.08), 0 2px 4px rgba(26, 77, 89, 0.04);
+  transition: all 0.25s ease;
+  min-height: 168px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.actuator-card-grid:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(26, 77, 89, 0.14);
+}
+
+.actuator-card-grid.is-active {
+  border-color: #a7f3d0;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12), 0 2px 6px rgba(16, 185, 129, 0.06);
+}
+
+.actuator-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+
+.actuator-big-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  font-size: 1.55rem;
+  transition: all 0.3s ease;
+}
+
+.icon-fan {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.actuator-card-grid.is-active .icon-fan {
+  background: #dbeafe;
+  color: #0284c7;
+}
+
+.fan-running {
+  animation: spinFan 1.4s linear infinite;
+}
+
+@keyframes spinFan {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.icon-heater {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.actuator-card-grid.is-active .icon-heater {
+  background: #ffedd5;
+  color: #ea580c;
+  animation: pulseWarm 2s ease-in-out infinite;
+}
+
+@keyframes pulseWarm {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(234, 88, 12, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); }
+}
+
+.icon-lamp {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.actuator-card-grid.is-active .icon-lamp {
+  background: #fef9c3;
+  color: #ca8a04;
+  box-shadow: 0 0 16px rgba(250, 204, 21, 0.45);
+}
+
+.icon-feeder {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.actuator-card-grid.is-active .icon-feeder {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.actuator-device-title {
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+/* Master preset buttons */
+.preset-btn-modern {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.preset-btn-modern:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+.preset-icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  display: grid;
+  place-items: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.preset-btn-danger:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+.preset-btn-danger:hover .preset-icon-circle {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* Hardware Relay Card */
+.relay-indicator-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-on {
+  background-color: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.dot-off {
+  background-color: #cbd5e1;
+}

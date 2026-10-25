@@ -1,0 +1,228 @@
+/* ChickGuard - Unified Topbar & Layout Styles */
+
+:root {
+  --cg-bg: #d9f3f6;
+  --cg-card-bg: #ffffff;
+  --cg-border: #e6f0f0;
+  --cg-text-dark: #0f172a;
+  --cg-text-muted: #64748b;
+  --cg-primary-mint: #10b981;
+  --cg-primary-teal: #0d9488;
+}
+
+body.dashboard-page {
+  background: var(--cg-bg);
+  color: var(--cg-text-dark);
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.dashboard-shell {
+  min-height: 100vh;
+  width: 100%;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem 2rem;
+  background: var(--cg-bg);
+}
+
+body.dashboard-page .content-section {
+  padding: 0;
+}
+
+/* Modern Topbar */
+.topbar-modern {
+  margin-bottom: 1.5rem;
+}
+
+.topbar-greeting {
+  min-width: 0;
+}
+
+.topbar-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
+}
+
+.topbar-subtitle {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin-bottom: 0;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.topbar-right-cluster {
+  flex-wrap: nowrap;
+}
+
+.topbar-widget-card {
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 14px;
+  padding: 0.45rem 1rem;
+  box-shadow: 0 4px 14px rgba(26, 77, 89, 0.08);
+  white-space: nowrap;
+}
+
+.topbar-widget-card .widget-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.topbar-widget-card .weather-cloud {
+  color: #0284c7;
+}
+
+.topbar-widget-card .weather-sun {
+  color: #f59e0b;
+}
+
+.topbar-widget-card .weather-rain {
+  color: #0ea5e9;
+}
+
+.topbar-widget-card .widget-primary {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.topbar-widget-card .widget-secondary {
+  font-size: 0.74rem;
+  color: #64748b;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.topbar-action-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid var(--cg-border);
+  color: #475569;
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(26, 77, 89, 0.08);
+  flex-shrink: 0;
+  padding: 0;
+  outline: none;
+}
+
+.topbar-action-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.notif-badge-dot {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid #ffffff;
+}
+
+.user-profile-badge {
+  background: transparent;
+  padding: 0.1rem 0.25rem;
+  white-space: nowrap;
+}
+
+.user-avatar-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #0d9488;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.35);
+  flex-shrink: 0;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.user-role {
+  font-size: 0.74rem;
+  color: #64748b;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Modal Notifikasi items */
+.notif-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.notif-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.notif-time {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 0.15rem;
+  line-height: 1.2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+  .main-content {
+    padding: 1rem;
+  }
+  
+  .topbar-title {
+    font-size: 1.4rem;
+  }
+
+  .topbar-right-cluster {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .topbar-widget-card {
+    padding: 0.35rem 0.65rem;
+  }
+
+  .topbar-action-btn,
+  .user-avatar-circle {
+    width: 38px;
+    height: 38px;
+  }
+}
