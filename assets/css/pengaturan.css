@@ -1,22 +1,27 @@
-/* ChickGuard - Pengaturan Page Modern Styles */
+﻿/* ChickGuard - Pengaturan Page Modern Unified Styles */
 
 .settings-card {
   background: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.85);
   border-radius: 20px;
   padding: 1.5rem 1.65rem;
-  box-shadow: 0 6px 20px rgba(26, 77, 89, 0.08), 0 2px 4px rgba(26, 77, 89, 0.04);
+  box-shadow: 0 4px 20px rgba(77, 109, 120, 0.16);
   height: 100%;
   display: flex;
   flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.settings-card:hover {
+  box-shadow: 0 6px 24px rgba(77, 109, 120, 0.2);
 }
 
 .settings-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 1rem;
+  border-bottom: 1px solid #e6f0f0;
+  padding-bottom: 0.9rem;
   margin-bottom: 1.25rem;
 }
 
@@ -38,45 +43,47 @@
 
 /* User Profile Banner Card */
 .user-banner-card {
-  background: linear-gradient(135deg, #0d9488 0%, #10b981 100%);
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.85);
   border-radius: 20px;
-  padding: 1.5rem 1.75rem;
-  color: #ffffff;
-  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.28);
+  padding: 1.35rem 1.75rem;
+  color: #0f172a;
+  box-shadow: 0 4px 20px rgba(77, 109, 120, 0.16);
   margin-bottom: 1.5rem;
 }
 
 .user-banner-avatar {
-  width: 68px;
-  height: 68px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  border: 3px solid rgba(255, 255, 255, 0.6);
+  background: #e6f7f8;
+  color: #0d9488;
+  border: 2px solid #bce6eb;
   display: grid;
   place-items: center;
-  font-size: 2rem;
-  color: #ffffff;
+  font-size: 1.75rem;
   flex-shrink: 0;
 }
 
 .user-banner-name {
   font-size: 1.35rem;
   font-weight: 800;
+  color: #0f172a;
   line-height: 1.2;
 }
 
 .user-banner-meta {
   font-size: 0.82rem;
-  opacity: 0.9;
+  color: #64748b;
 }
 
 .user-badge-role {
-  background: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  color: #ffffff;
+  background: #e6f7f8;
+  border: 1px solid #bce6eb;
+  color: #0d9488;
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 0.25rem 0.65rem;
+  padding: 0.2rem 0.65rem;
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -99,8 +106,8 @@
 
 .form-control-modern {
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border: 1px solid #dbe7eb;
+  border-radius: 14px;
   padding: 0.65rem 0.95rem;
   font-size: 0.88rem;
   font-family: inherit;
@@ -111,9 +118,9 @@
 
 .form-control-modern:focus {
   background: #ffffff;
-  border-color: #10b981;
+  border-color: #5cb6df;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0 0 3px rgba(92, 182, 223, 0.25);
 }
 
 .form-control-modern:disabled,
@@ -151,12 +158,13 @@
   color: #0f172a;
 }
 
+/* Action Buttons styled to match other pages */
 .btn-settings-save {
-  background: #10b981;
+  background: #0d9488;
   color: #ffffff;
   border: none;
-  border-radius: 12px;
-  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  padding: 0.65rem 1.4rem;
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
@@ -164,22 +172,22 @@
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.25);
 }
 
 .btn-settings-save:hover {
-  background: #059669;
+  background: #0f766e;
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.35);
   color: #ffffff;
 }
 
 .btn-settings-secondary {
-  background: #0f172a;
+  background: #496d74;
   color: #ffffff;
   border: none;
-  border-radius: 12px;
-  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  padding: 0.65rem 1.4rem;
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
@@ -187,10 +195,13 @@
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(73, 109, 116, 0.25);
 }
 
 .btn-settings-secondary:hover {
-  background: #1e293b;
+  background: #39575d;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(73, 109, 116, 0.35);
   color: #ffffff;
 }
 
@@ -208,8 +219,8 @@
   background: #0f172a;
   color: #ffffff;
   padding: 12px 20px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(26, 77, 89, 0.25);
   z-index: 9999;
   display: flex;
   align-items: center;

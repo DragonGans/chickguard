@@ -64,6 +64,15 @@ function chickguard_init_tables(mysqli $koneksi): void
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )");
 
+    mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS log_pemberian_pakan (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        waktu DATETIME NOT NULL,
+        metode VARCHAR(50) NOT NULL DEFAULT 'Otomatis',
+        status VARCHAR(50) NOT NULL DEFAULT 'Berhasil',
+        keterangan VARCHAR(255) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
     mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS notifikasi (
         id INT AUTO_INCREMENT PRIMARY KEY,
         pesan VARCHAR(255) NOT NULL,
@@ -88,6 +97,7 @@ function chickguard_init_tables(mysqli $koneksi): void
     ensure_log_harian_extra_columns($koneksi);
     seed_actuator_status($koneksi);
     seed_data_sensor($koneksi);
+    seed_log_pemberian_pakan($koneksi);
     seed_notifikasi($koneksi);
     seed_pengaturan_kandang($koneksi);
     seed_jadwal_pakan_minum($koneksi);
@@ -201,11 +211,9 @@ function seed_jadwal_pakan_minum(mysqli $koneksi): void
     }
 
     $data = [
-        ['Pakan', '06:00:00', 3.0, 'Senin, Rabu, Jumat', 'Pakan pagi untuk awal aktivitas'],
-        ['Minum', '07:00:00', 2.0, 'Semua Hari', 'Isi air minum setelah pakan pagi'],
-        ['Pakan', '12:00:00', 2.0, 'Semua Hari', 'Tambahan pakan siang secukupnya'],
-        ['Minum', '13:00:00', 1.5, 'Selasa, Kamis', 'Pengecekan dan isi ulang wadah air'],
-        ['Pakan', '19:00:00', 2.8, 'Sabtu, Minggu', 'Pakan malam untuk akhir pekan'],
+        ['Pakan', '06:00:00', 3.0, 'Semua Hari', 'Pakan Pagi Rutin'],
+        ['Pakan', '12:00:00', 2.0, 'Semua Hari', 'Pakan Siang Tambahan'],
+        ['Pakan', '16:00:00', 2.5, 'Semua Hari', 'Pakan Sore Rutin'],
     ];
 
     $stmt = mysqli_prepare($koneksi, "INSERT INTO jadwal_pakan_minum (jenis, waktu, jumlah, hari, catatan) VALUES (?, ?, ?, ?, ?)");
@@ -249,36 +257,36 @@ function seed_log_harian(mysqli $koneksi): void
     }
 
     $data = [
-        ['00:00:00', 26, 65, null, null, 'Mati'],
-        ['01:00:00', 25, 67, null, null, 'Mati'],
-        ['02:00:00', 25, 68, null, null, 'Mati'],
-        ['03:00:00', 24, 69, null, null, 'Mati'],
-        ['04:00:00', 24, 70, null, null, 'Mati'],
-        ['05:00:00', 24, 71, null, null, 'Mati'],
-        ['06:00:00', 25, 70, 2.5, 5.2, 'Hidup'],
-        ['07:00:00', 26, 68, null, 3.1, 'Hidup'],
-        ['08:00:00', 27, 66, null, 2.8, 'Hidup'],
-        ['09:00:00', 28, 64, null, 3.5, 'Hidup'],
-        ['10:00:00', 29, 63, null, null, 'Hidup'],
-        ['11:00:00', 30, 61, null, null, 'Hidup'],
-        ['12:00:00', 30, 60, 2.0, null, 'Hidup'],
-        ['13:00:00', 31, 59, null, 1.5, 'Hidup'],
-        ['14:00:00', 31, 58, null, null, 'Hidup'],
-        ['15:00:00', 30, 60, null, null, 'Hidup'],
-        ['16:00:00', 29, 62, null, null, 'Hidup'],
-        ['17:00:00', 28, 64, null, null, 'Hidup'],
-        ['18:00:00', 27, 66, null, null, 'Hidup'],
-        ['19:00:00', 27, 67, 2.8, null, 'Hidup'],
-        ['20:00:00', 26, 68, null, null, 'Mati'],
-        ['21:00:00', 26, 69, null, null, 'Mati'],
-        ['22:00:00', 25, 70, null, null, 'Mati'],
-        ['23:00:00', 25, 71, null, null, 'Mati'],
+        ['00:00:00', 26.0, 65.0, 0, 75.0, 'Mati'],
+        ['01:00:00', 25.5, 67.0, 0, 75.0, 'Mati'],
+        ['02:00:00', 25.0, 68.0, 0, 74.5, 'Mati'],
+        ['03:00:00', 24.8, 69.0, 0, 74.0, 'Mati'],
+        ['04:00:00', 24.5, 70.0, 0, 74.0, 'Mati'],
+        ['05:00:00', 24.8, 71.0, 50, 73.5, 'Mati'],
+        ['06:00:00', 25.5, 70.0, 350, 85.0, 'Hidup'],
+        ['07:00:00', 26.5, 68.0, 750, 84.0, 'Hidup'],
+        ['08:00:00', 27.8, 66.0, 1100, 82.5, 'Hidup'],
+        ['09:00:00', 28.5, 64.0, 1350, 80.0, 'Hidup'],
+        ['10:00:00', 29.8, 63.0, 1500, 78.5, 'Hidup'],
+        ['11:00:00', 30.5, 61.0, 1650, 76.0, 'Hidup'],
+        ['12:00:00', 31.2, 60.0, 1750, 74.5, 'Hidup'],
+        ['13:00:00', 31.8, 59.0, 1700, 73.0, 'Hidup'],
+        ['14:00:00', 31.5, 58.0, 1600, 72.0, 'Hidup'],
+        ['15:00:00', 30.8, 60.0, 1400, 71.0, 'Hidup'],
+        ['16:00:00', 29.5, 62.0, 1150, 80.0, 'Hidup'],
+        ['17:00:00', 28.5, 64.0, 650, 78.5, 'Hidup'],
+        ['18:00:00', 27.5, 66.0, 150, 77.0, 'Hidup'],
+        ['19:00:00', 27.0, 67.0, 0, 76.0, 'Hidup'],
+        ['20:00:00', 26.5, 68.0, 0, 75.5, 'Mati'],
+        ['21:00:00', 26.0, 69.0, 0, 75.0, 'Mati'],
+        ['22:00:00', 25.5, 70.0, 0, 75.0, 'Mati'],
+        ['23:00:00', 25.0, 71.0, 0, 74.5, 'Mati'],
     ];
 
-    $stmt = mysqli_prepare($koneksi, "INSERT INTO log_harian (waktu, suhu, kelembaban, pakan, minum, lampu) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt = mysqli_prepare($koneksi, "INSERT INTO log_harian (waktu, suhu, kelembaban, cahaya, level_air, lampu) VALUES (?, ?, ?, ?, ?, ?)");
     foreach ($data as $item) {
-        [$waktu, $suhu, $kelembaban, $pakan, $minum, $lampu] = $item;
-        mysqli_stmt_bind_param($stmt, "sdddds", $waktu, $suhu, $kelembaban, $pakan, $minum, $lampu);
+        [$waktu, $suhu, $kelembaban, $cahaya, $level_air, $lampu] = $item;
+        mysqli_stmt_bind_param($stmt, "sdddds", $waktu, $suhu, $kelembaban, $cahaya, $level_air, $lampu);
         mysqli_stmt_execute($stmt);
     }
 }
@@ -378,4 +386,31 @@ function tambah_log_harian_otomatis(mysqli $koneksi): void
     mysqli_stmt_bind_param($stmt, "sdddds", $waktu, $suhu, $kelembaban, $pakan, $minum, $lampu);
     mysqli_stmt_execute($stmt);
 }
-?>
+
+function seed_log_pemberian_pakan(mysqli $koneksi): void
+{
+    $result = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM log_pemberian_pakan");
+    $row = mysqli_fetch_assoc($result);
+    if ((int) ($row['total'] ?? 0) > 0) {
+        return;
+    }
+
+    $now = date('Y-m-d');
+    $yesterday = date('Y-m-d', strtotime('-1 day'));
+    $samples = [
+        [$now . ' 16:00:00', 'Otomatis', 'Berhasil', 'Pemberian pakan sore sesuai jadwal'],
+        [$now . ' 12:00:00', 'Otomatis', 'Berhasil', 'Pemberian pakan siang sesuai jadwal'],
+        [$now . ' 08:30:00', 'Manual', 'Berhasil', 'Pemberian pakan manual via dispenser'],
+        [$now . ' 06:00:00', 'Otomatis', 'Berhasil', 'Pemberian pakan pagi sesuai jadwal'],
+        [$yesterday . ' 16:00:00', 'Otomatis', 'Berhasil', 'Pemberian pakan sore sesuai jadwal'],
+        [$yesterday . ' 12:00:00', 'Otomatis', 'Berhasil', 'Pemberian pakan siang sesuai jadwal'],
+        [$yesterday . ' 06:00:00', 'Otomatis', 'Berhasil', 'Pemberian pakan pagi sesuai jadwal'],
+    ];
+
+    $stmt = mysqli_prepare($koneksi, "INSERT INTO log_pemberian_pakan (waktu, metode, status, keterangan) VALUES (?, ?, ?, ?)");
+    foreach ($samples as $s) {
+        [$waktu, $metode, $status, $keterangan] = $s;
+        mysqli_stmt_bind_param($stmt, "ssss", $waktu, $metode, $status, $keterangan);
+        mysqli_stmt_execute($stmt);
+    }
+}

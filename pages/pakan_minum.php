@@ -10,9 +10,9 @@ include '../config/koneksi.php';
 include '../proses/init_tables.php';
 chickguard_init_tables($koneksi);
 
-$limit = 5;
+$limit = 6;
 $page = max(1, (int) ($_GET['page'] ?? 1));
-$countResult = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM jadwal_pakan_minum");
+$countResult = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM jadwal_pakan_minum WHERE jenis = 'Pakan'");
 $totalData = (int) (mysqli_fetch_assoc($countResult)['total'] ?? 0);
 $totalPages = max(1, (int) ceil($totalData / $limit));
 if ($page > $totalPages) {
@@ -20,7 +20,7 @@ if ($page > $totalPages) {
 }
 $offset = ($page - 1) * $limit;
 
-$stmt = mysqli_prepare($koneksi, "SELECT * FROM jadwal_pakan_minum ORDER BY waktu ASC, id ASC LIMIT ? OFFSET ?");
+$stmt = mysqli_prepare($koneksi, "SELECT * FROM jadwal_pakan_minum WHERE jenis = 'Pakan' ORDER BY waktu ASC, id ASC LIMIT ? OFFSET ?");
 mysqli_stmt_bind_param($stmt, "ii", $limit, $offset);
 mysqli_stmt_execute($stmt);
 $query = mysqli_stmt_get_result($stmt);
@@ -31,18 +31,18 @@ while ($row = mysqli_fetch_assoc($query)) {
 $startData = $totalData > 0 ? $offset + 1 : 0;
 $endData = $totalData > 0 ? $offset + count($jadwal) : 0;
 
+// Riwayat log pemberian pakan terbaru (10 data terakhir)
+$feedLogsQuery = mysqli_query($koneksi, "SELECT * FROM log_pemberian_pakan ORDER BY waktu DESC, id DESC LIMIT 10");
+$feedLogs = [];
+if ($feedLogsQuery) {
+    while ($fl = mysqli_fetch_assoc($feedLogsQuery)) {
+        $feedLogs[] = $fl;
+    }
+}
+
 function e($value): string
 {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-}
-
-function selected_days(string $hari): array
-{
-    if ($hari === 'Semua Hari') {
-        return ['Semua Hari'];
-    }
-
-    return array_map('trim', explode(',', $hari));
 }
 
 function checkbox_id($prefix, $value): string
@@ -53,46 +53,46 @@ function checkbox_id($prefix, $value): string
 $statusMessages = [
     'created' => [
         'title' => 'Jadwal Ditambahkan',
-        'message' => 'Jadwal pakan atau minum baru berhasil disimpan.',
+        'message' => 'Jadwal pemberian pakan baru berhasil disimpan.',
         'tone' => 'success',
         'icon' => 'bi-check2-circle',
     ],
     'updated' => [
         'title' => 'Jadwal Diperbarui',
-        'message' => 'Perubahan jadwal berhasil diterapkan.',
+        'message' => 'Perubahan jadwal pakan berhasil diterapkan.',
         'tone' => 'success',
         'icon' => 'bi-pencil-square',
     ],
     'deleted' => [
         'title' => 'Jadwal Dihapus',
-        'message' => 'Jadwal yang dipilih sudah dihapus dari daftar.',
+        'message' => 'Jadwal pakan yang dipilih sudah dihapus dari daftar.',
         'tone' => 'success',
         'icon' => 'bi-trash3',
     ],
     'invalid' => [
         'title' => 'Form Belum Lengkap',
-        'message' => 'Periksa kembali isian jadwal sebelum disimpan.',
+        'message' => 'Periksa kembali isian jam dan hari sebelum disimpan.',
         'tone' => 'warning',
         'icon' => 'bi-exclamation-circle',
     ],
     'none_selected' => [
         'title' => 'Belum Ada yang Dipilih',
-        'message' => 'Pilih minimal satu jadwal pakan atau minum terlebih dahulu sebelum menjalankan hapus massal.',
+        'message' => 'Pilih minimal satu jadwal pakan terlebih dahulu sebelum menjalankan hapus massal.',
         'tone' => 'warning',
         'icon' => 'bi-exclamation-circle',
     ],
 ];
 
 $activePage = 'pakan_minum';
-$topbarTitle = 'Pakan Minum';
-$topbarSubtitle = 'Pantau stok, aksi cepat, dan jadwal pemberian pakan minum';
+$topbarTitle = 'Jadwal Pakan';
+$topbarSubtitle = 'Kelola jadwal pemberian pakan otomatis kandang dan tinjau log riwayat pakan.';
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ChickGuard - Pakan Minum</title>
+  <title>ChickGuard - Jadwal Pakan & Log Pemberian</title>
   <link rel="icon" href="../assets/images/branding/icon.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -113,55 +113,23 @@ $topbarSubtitle = 'Pantau stok, aksi cepat, dan jadwal pemberian pakan minum';
 
       <section class="content-section">
         <div class="container-fluid px-0">
-          <div class="card-soft status-overview mb-4">
-            <div class="row align-items-center g-4 status-overview-grid">
-              <div class="col-12 col-lg-3 status-grid-item supply-panel-item">
-                <div class="supply-group">
-                  <div class="supply-icon feed"><i class="fa-solid fa-bowl-food"></i></div>
-                  <div class="supply-body">
-                    <div class="supply-title">Pakan</div>
-                    <div class="supply-value" id="feedPercent">75%</div>
-                    <div class="supply-stock-text" id="feedStockText">15.0 / 20.0 kg</div>
-                    <div class="progress-slim"><div class="progress-bar bg-success" id="feedProgressBar" style="width: 75%"></div></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-auto d-none d-lg-flex status-grid-item divider-item"><div class="overview-divider"></div></div>
-
-              <div class="col-12 col-lg-3 status-grid-item supply-panel-item">
-                <div class="supply-group">
-                  <div class="supply-icon water"><i class="bi bi-droplet-fill"></i></div>
-                  <div class="supply-body">
-                    <div class="supply-title">Air</div>
-                    <div class="supply-value" id="waterPercent">60%</div>
-                    <div class="supply-stock-text" id="waterStockText">12.0 / 20.0 L</div>
-                    <div class="progress-slim"><div class="progress-bar bg-info" id="waterProgressBar" style="width: 60%"></div></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-12 col-md-6 col-lg-3 status-grid-item action-slot">
-                <div class="d-flex justify-content-center">
-                  <button type="button" class="pill-button action-btn feed" id="feedActionBtn">Beri Pakan</button>
-                </div>
-              </div>
-
-              <div class="col-12 col-md-6 col-lg-3 status-grid-item action-slot">
-                <div class="d-flex justify-content-center">
-                  <button type="button" class="pill-button action-btn water" id="waterActionBtn">Beri Minum</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card-soft log-card schedule-card">
-            <div class="log-toolbar">
+          <!-- Schedule Table Card -->
+          <div class="card-soft log-card schedule-card bg-white rounded-4 p-4" style="box-shadow: 0 4px 20px rgba(77, 109, 120, 0.16); border: 1px solid rgba(255,255,255,0.85);">
+            <div class="log-toolbar d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
               <div>
-                <h2 class="log-title">Jadwal Pemberian</h2>
-                <p class="log-subtitle">Kelola jadwal pakan dan minum kandang tanpa keluar dari halaman ini</p>
+                <h2 class="log-title fw-bold text-dark fs-5 mb-1">Jadwal Pemberian Pakan</h2>
+                <p class="log-subtitle text-muted small mb-0">Kelola daftar waktu dan hari operasional pakan otomatis kandang</p>
               </div>
-              <button type="button" class="pill-button add-btn js-open-schedule-modal">+ Tambah Jadwal</button>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <button type="button" class="btn btn-outline-success fw-semibold px-4 py-2 rounded-pill shadow-sm d-inline-flex align-items-center gap-2" id="feedActionBtn">
+                  <i class="fa-solid fa-play"></i>
+                  <span>Beri Pakan Sekarang</span>
+                </button>
+                <button type="button" class="btn btn-success fw-semibold px-4 py-2 rounded-pill js-open-schedule-modal d-inline-flex align-items-center gap-2 shadow-sm">
+                  <i class="bi bi-plus-circle-fill"></i>
+                  <span>Tambah Jadwal Pakan</span>
+                </button>
+              </div>
             </div>
 
             <form method="post" action="../proses/proses_pakan_minum.php" id="bulkDeleteForm">
@@ -170,74 +138,101 @@ $topbarSubtitle = 'Pantau stok, aksi cepat, dan jadwal pemberian pakan minum';
               <div class="table-wrap">
                 <div class="table-responsive">
                   <table class="table data-table schedule-table align-middle">
-                  <thead>
-                    <tr>
-                      <th class="check-col">
-                        <label class="schedule-day log-check">
-                          <input type="checkbox" id="selectAllSchedules">
-                          <span><span class="visually-hidden">Pilih semua jadwal pakan minum</span></span>
-                        </label>
-                      </th>
-                      <th>Jenis</th>
-                      <th>Waktu</th>
-                      <th>Jumlah</th>
-                      <th>Hari</th>
-                      <th>Catatan</th>
-                      <th class="text-center">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php if (count($jadwal) === 0): ?>
-                      <tr><td colspan="7" class="text-center text-muted py-4">Belum ada jadwal.</td></tr>
-                    <?php endif; ?>
-
-                    <?php foreach ($jadwal as $item): ?>
-                      <?php $unit = $item['jenis'] === 'Pakan' ? 'kg' : 'L'; ?>
-                      <?php $rowCheckboxId = checkbox_id('schedule-row', $item['id'] ?? ''); ?>
+                    <thead>
                       <tr>
-                        <td class="check-col">
-                          <label class="schedule-day log-check" for="<?= e($rowCheckboxId) ?>">
-                            <input type="checkbox" id="<?= e($rowCheckboxId) ?>" class="schedule-row-checkbox" name="selected_schedules[]" value="<?= e($item['id']) ?>">
-                            <span><span class="visually-hidden">Pilih jadwal <?= e($item['jenis']) ?> pukul <?= e(date('H:i', strtotime($item['waktu']))) ?></span></span>
+                        <th class="check-col">
+                          <label class="schedule-day log-check m-0">
+                            <input type="checkbox" id="selectAllSchedules">
+                            <span><span class="visually-hidden">Pilih semua jadwal pakan</span></span>
                           </label>
-                        </td>
-                        <td><?= e($item['jenis']) ?></td>
-                        <td><?= e(date('H:i', strtotime($item['waktu']))) ?></td>
-                        <td><?= e(number_format((float) $item['jumlah'], 1)) ?> <?= e($unit) ?></td>
-                        <td><?= e($item['hari']) ?></td>
-                        <td><?= e($item['catatan']) ?></td>
-                        <td>
-                          <div class="action-icons justify-content-center">
-                            <i class="bi bi-pencil-square edit js-edit-schedule"
-                               data-id="<?= e($item['id']) ?>"
-                               data-jenis="<?= e($item['jenis']) ?>"
-                               data-waktu="<?= e(date('H:i', strtotime($item['waktu']))) ?>"
-                               data-jumlah="<?= e($item['jumlah']) ?>"
-                               data-hari="<?= e($item['hari']) ?>"
-                               data-catatan="<?= e($item['catatan']) ?>"></i>
-                            <a href="../proses/proses_pakan_minum.php?action=delete&id=<?= e($item['id']) ?>" class="js-open-delete-modal" data-delete-href="../proses/proses_pakan_minum.php?action=delete&id=<?= e($item['id']) ?>">
-                              <i class="bi bi-trash3 delete"></i>
-                            </a>
-                          </div>
-                        </td>
+                        </th>
+                        <th>Sesi Pakan</th>
+                        <th>Waktu Pemberian</th>
+                        <th>Hari Aktif</th>
+                        <th>Status</th>
+                        <th class="text-center">Aksi</th>
                       </tr>
-                    <?php endforeach; ?>
-                  </tbody>
+                    </thead>
+                    <tbody>
+                      <?php if (count($jadwal) === 0): ?>
+                        <tr><td colspan="6" class="text-center text-muted py-4">Belum ada jadwal pakan. Silakan klik tombol "Tambah Jadwal Pakan".</td></tr>
+                      <?php endif; ?>
+
+                      <?php foreach ($jadwal as $index => $item): ?>
+                        <?php 
+                          $rowCheckboxId = checkbox_id('schedule-row', $item['id'] ?? ''); 
+                          $sesiLabel = !empty($item['catatan']) ? $item['catatan'] : ('Pakan ' . ($index + 1));
+                          $isActive = !isset($item['is_active']) || $item['is_active'] == 1;
+                        ?>
+                        <tr>
+                          <td class="check-col">
+                            <label class="schedule-day log-check m-0" for="<?= e($rowCheckboxId) ?>">
+                              <input type="checkbox" id="<?= e($rowCheckboxId) ?>" class="schedule-row-checkbox" name="selected_schedules[]" value="<?= e($item['id']) ?>">
+                              <span><span class="visually-hidden">Pilih jadwal pukul <?= e(date('H:i', strtotime($item['waktu']))) ?></span></span>
+                            </label>
+                          </td>
+                          <td>
+                            <div class="d-flex align-items-center gap-2">
+                              <div style="width: 32px; height: 32px; border-radius: 8px; background: #e6f9f0; color: #10b981; display: grid; place-items: center; font-size: 0.95rem;">
+                                <i class="fa-solid fa-utensils"></i>
+                              </div>
+                              <strong class="text-dark"><?= e($sesiLabel) ?></strong>
+                            </div>
+                          </td>
+                          <td>
+                            <span class="badge bg-light text-dark border px-2.5 py-1.5 fw-semibold" style="font-size:0.85rem;">
+                              <i class="bi bi-clock me-1 text-primary"></i><?= e(date('H:i', strtotime($item['waktu']))) ?> WIB
+                            </span>
+                          </td>
+                          <td>
+                            <span class="text-secondary fw-medium"><?= e($item['hari']) ?></span>
+                          </td>
+                          <td>
+                            <?php if ($isActive): ?>
+                              <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill fw-semibold">
+                                <i class="bi bi-check-circle-fill me-1"></i> Aktif
+                              </span>
+                            <?php else: ?>
+                              <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2.5 py-1 rounded-pill fw-semibold">
+                                <i class="bi bi-pause-circle-fill me-1"></i> Nonaktif
+                              </span>
+                            <?php endif; ?>
+                          </td>
+                          <td>
+                            <div class="action-icons justify-content-center d-flex align-items-center gap-2">
+                              <button type="button" class="btn btn-sm btn-light text-primary border rounded-circle js-edit-schedule" style="width:34px;height:34px;display:grid;place-items:center;"
+                                 data-id="<?= e($item['id']) ?>"
+                                 data-waktu="<?= e(date('H:i', strtotime($item['waktu']))) ?>"
+                                 data-hari="<?= e($item['hari']) ?>"
+                                 title="Edit Jadwal">
+                                <i class="bi bi-pencil-square"></i>
+                              </button>
+                              <a href="../proses/proses_pakan_minum.php?action=delete&id=<?= e($item['id']) ?>" 
+                                 class="btn btn-sm btn-light text-danger border rounded-circle js-open-delete-modal" style="width:34px;height:34px;display:grid;place-items:center;"
+                                 data-delete-href="../proses/proses_pakan_minum.php?action=delete&id=<?= e($item['id']) ?>"
+                                 title="Hapus Jadwal">
+                                <i class="bi bi-trash3"></i>
+                              </a>
+                            </div>
+                          </td>
+                        </tr>
+                      <?php endforeach; ?>
+                    </tbody>
                   </table>
                 </div>
               </div>
 
-              <div class="table-footer">
-                <button type="submit" class="log-delete-btn" id="deleteSelectedBtn" disabled>
+              <div class="table-footer d-flex justify-content-between align-items-center flex-wrap gap-3 mt-3 pt-3 border-top">
+                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-2" id="deleteSelectedBtn" disabled>
                   <i class="bi bi-trash3-fill"></i>
-                  <span>Hapus</span>
+                  <span>Hapus Terpilih</span>
                 </button>
 
-                <div class="footer-left">
-                  <span>Menampilkan <strong><?= e($startData) ?> - <?= e($endData) ?></strong> dari <strong><?= e($totalData) ?></strong> entri</span>
+                <div class="footer-left text-muted small">
+                  <span>Menampilkan <strong><?= e($startData) ?> - <?= e($endData) ?></strong> dari <strong><?= e($totalData) ?></strong> jadwal pakan</span>
                 </div>
 
-                <div class="pagination-wrap">
+                <div class="pagination-wrap d-flex align-items-center gap-1">
                   <a class="page-chip <?= $page <= 1 ? 'muted' : '' ?>" href="?page=1">&laquo;</a>
                   <a class="page-chip <?= $page <= 1 ? 'muted' : '' ?>" href="?page=<?= e(max(1, $page - 1)) ?>">&lsaquo;</a>
                   <?php for ($i = 1; $i <= $totalPages; $i++): ?>
@@ -248,6 +243,81 @@ $topbarSubtitle = 'Pantau stok, aksi cepat, dan jadwal pemberian pakan minum';
                 </div>
               </div>
             </form>
+          </div>
+
+          <!-- Card: Log Pemberian Pakan -->
+          <div class="card-soft log-card bg-white rounded-4 p-4 mt-4" style="box-shadow: 0 4px 20px rgba(77, 109, 120, 0.16); border: 1px solid rgba(255,255,255,0.85);">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+              <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <div style="width: 38px; height: 38px; border-radius: 12px; background: #e6f9f0; color: #10b981; display: grid; place-items: center; font-size: 1.15rem;">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                  </div>
+                  <h2 class="log-title fw-bold text-dark fs-5 mb-0">Log Pemberian Pakan</h2>
+                </div>
+                <p class="log-subtitle text-muted small mb-0">Riwayat pencatatan aktivitas pakan otomatis dari jadwal dan pemberian manual</p>
+              </div>
+              <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill fw-semibold">
+                <i class="bi bi-broadcast text-success me-1"></i> Realtime Logger
+              </span>
+            </div>
+
+            <div class="table-wrap">
+              <div class="table-responsive">
+                <table class="table data-table align-middle">
+                  <thead>
+                    <tr>
+                      <th style="width: 60px;">No</th>
+                      <th>Waktu & Tanggal</th>
+                      <th>Metode</th>
+                      <th>Status</th>
+                      <th>Keterangan</th>
+                    </tr>
+                  </thead>
+                  <tbody id="feedLogTableBody">
+                    <?php if (count($feedLogs) === 0): ?>
+                      <tr><td colspan="5" class="text-center text-muted py-4">Belum ada riwayat aktivitas pakan.</td></tr>
+                    <?php endif; ?>
+
+                    <?php foreach ($feedLogs as $idx => $flog): ?>
+                      <?php 
+                        $isAuto = strtolower($flog['metode'] ?? '') === 'otomatis';
+                      ?>
+                      <tr>
+                        <td class="text-muted fw-semibold"><?= $idx + 1 ?></td>
+                        <td>
+                          <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-light text-dark border px-2.5 py-1.5 fw-semibold" style="font-size:0.85rem;">
+                              <i class="bi bi-clock me-1 text-primary"></i><?= date('H:i', strtotime($flog['waktu'])) ?> WIB
+                            </span>
+                            <span class="text-secondary small"><?= date('d M Y', strtotime($flog['waktu'])) ?></span>
+                          </div>
+                        </td>
+                        <td>
+                          <?php if ($isAuto): ?>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-semibold">
+                              <i class="bi bi-cpu me-1"></i> Otomatis (Jadwal)
+                            </span>
+                          <?php else: ?>
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1 fw-semibold">
+                              <i class="bi bi-hand-index-thumb me-1"></i> Manual (Dispenser)
+                            </span>
+                          <?php endif; ?>
+                        </td>
+                        <td>
+                          <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-semibold">
+                            <i class="bi bi-check-circle-fill me-1"></i> <?= e($flog['status'] ?? 'Berhasil') ?>
+                          </span>
+                        </td>
+                        <td class="text-secondary small fw-medium">
+                          <?= e($flog['keterangan'] ?? 'Pemberian pakan kandang') ?>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -269,327 +339,281 @@ $topbarSubtitle = 'Pantau stok, aksi cepat, dan jadwal pemberian pakan minum';
       </button>
     </div>
   <?php endif; ?>
-<!-- Ini modal popup -->
-  <div class="schedule-modal-backdrop hidden" id="scheduleModal" aria-hidden="true">
-    <div class="schedule-modal-card" role="dialog" aria-modal="true" aria-labelledby="scheduleModalTitle">
-      <form class="schedule-form" method="post" action="../proses/proses_pakan_minum.php">
-        <input type="hidden" name="action" id="formAction" value="create">
-        <input type="hidden" name="id" id="scheduleId">
 
-        <div class="schedule-modal-head">
-          <div class="schedule-modal-icon" id="scheduleTypeIcon"><i class="fa-solid fa-bowl-food"></i></div>
-          <div>
-            <h2 id="scheduleModalTitle">Tambah Jadwal</h2>
-            <p id="scheduleModalSubtitle">Atur jadwal pemberian pakan dan minum</p>
-          </div>
-        </div>
-
-        <div class="schedule-group">
-          <div class="schedule-group-title">Jenis</div>
-          <div class="schedule-type-switch">
-            <button type="button" class="schedule-type-btn active" data-type="Pakan">Pakan</button>
-            <button type="button" class="schedule-type-btn" data-type="Minum">Minum</button>
-          </div>
-          <input type="hidden" name="jenis" id="scheduleJenis" value="Pakan">
-        </div>
-
-        <div class="schedule-fields-grid">
-          <label class="schedule-field">
-            <span class="schedule-field-label"><i class="bi bi-clock"></i> Waktu Pemberian</span>
-            <input type="time" name="waktu" id="scheduleWaktu" value="08:00" required>
-          </label>
-
-          <div class="schedule-field">
-            <span class="schedule-field-label"><i class="bi bi-sliders"></i> Jumlah</span>
-            <div class="schedule-amount-wrap">
-              <input type="number" name="jumlah" id="scheduleJumlah" min="0.1" step="0.1" required>
-              <span class="schedule-unit" id="scheduleUnit">Kg</span>
+  <!-- Modal Popup: Tambah / Edit Jadwal Pakan (Redesigned) -->
+  <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
+        <div class="modal-header border-0 pb-0 pt-4 px-4 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width: 48px; height: 48px; border-radius: 14px; background: #e6f9f0; color: #0d9488; display: grid; place-items: center; font-size: 1.35rem;">
+              <i class="fa-solid fa-bowl-food"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold text-dark mb-0" id="scheduleModalTitle">Tambah Jadwal Pakan</h5>
+              <small class="text-muted" id="scheduleModalSubtitle">Atur waktu dan hari operasional pakan otomatis</small>
             </div>
           </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+        <form method="post" action="../proses/proses_pakan_minum.php" id="formSchedule">
+          <input type="hidden" name="action" id="formAction" value="create">
+          <input type="hidden" name="id" id="scheduleId">
+          <input type="hidden" name="jenis" value="Pakan">
+          
+          <div class="modal-body px-4 py-3">
+            <!-- Waktu Pemberian -->
+            <div class="mb-4">
+              <label for="scheduleWaktu" class="form-label fw-bold text-dark small d-flex align-items-center gap-1.5 mb-2">
+                <i class="bi bi-clock-fill text-success"></i> Waktu Pemberian (WIB)
+              </label>
+              <div class="input-group">
+                <input type="time" name="waktu" id="scheduleWaktu" class="form-control form-control-lg rounded-3 fw-bold text-dark" value="08:00" required style="border: 1.5px solid #cbd5e1; font-size: 1.35rem; letter-spacing: 1px; padding: 0.6rem 1rem;">
+              </div>
+            </div>
 
-        <div class="schedule-group">
-          <span class="schedule-field-label"><i class="bi bi-calendar3"></i> Pilih Hari</span>
-          <div class="schedule-days">
-            <?php foreach (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $day): ?>
-              <label class="schedule-day"><input type="checkbox" name="hari[]" value="<?= e($day) ?>"><span><?= e($day) ?></span></label>
-            <?php endforeach; ?>
-            <label class="schedule-day"><input type="checkbox" name="hari[]" value="Semua Hari" id="allDays"><span>Semua Hari</span></label>
+            <!-- Pilih Hari -->
+            <div class="mb-2">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label fw-bold text-dark small d-flex align-items-center gap-1.5 mb-0">
+                  <i class="bi bi-calendar-week-fill text-success"></i> Pilih Hari Aktif
+                </label>
+                <button type="button" class="btn btn-sm btn-link text-decoration-none text-muted p-0 small" id="scheduleResetBtn" style="font-size: 0.8rem;">
+                  <i class="bi bi-arrow-repeat me-1"></i>Pilih Ulang
+                </button>
+              </div>
+
+              <div class="schedule-days-container p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                <div class="mb-3">
+                  <label class="form-check d-flex align-items-center gap-2 m-0" style="cursor: pointer;">
+                    <input class="form-check-input mt-0" type="checkbox" name="hari[]" value="Semua Hari" id="allDays" checked style="width: 1.15rem; height: 1.15rem;">
+                    <span class="form-check-label fw-bold text-dark small">Pilih Semua Hari (Setiap Hari)</span>
+                  </label>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-2 pt-1" id="dayButtonsContainer">
+                  <?php foreach (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $day): ?>
+                    <label class="day-chip-item m-0">
+                      <input type="checkbox" name="hari[]" value="<?= e($day) ?>" class="day-checkbox visually-hidden" checked>
+                      <span class="day-chip-badge"><?= e($day) ?></span>
+                    </label>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+            </div>
           </div>
-          <button type="button" class="schedule-reset-btn" id="scheduleResetBtn"><i class="bi bi-arrow-repeat"></i><span>Reset</span></button>
-        </div>
-
-        <label class="schedule-field schedule-note-field">
-          <span class="schedule-field-label"><i class="bi bi-check-circle"></i> Catatan (Opsional)</span>
-          <input type="text" name="catatan" id="scheduleCatatan" placeholder="Contoh: Pagi hari">
-        </label>
-
-        <div class="schedule-actions">
-          <button type="button" class="schedule-btn secondary" id="closeScheduleModal">Batal</button>
-          <button type="submit" class="schedule-btn primary"><i class="bi bi-calendar-check"></i><span>Simpan</span></button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="delete-modal-backdrop hidden" id="deleteConfirmModal" aria-hidden="true">
-    <div class="delete-modal-card" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle">
-      <div class="delete-modal-icon">
-        <i class="bi bi-trash3-fill"></i>
-      </div>
-      <h2 id="deleteConfirmTitle">Konfirmasi Hapus</h2>
-      <p id="deleteConfirmMessage">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan dan data akan hilang secara permanen.</p>
-      <div class="delete-modal-actions">
-        <button type="button" class="delete-modal-btn secondary" id="cancelDeleteBtn">Batal</button>
-        <a href="#" class="delete-modal-btn primary" id="confirmDeleteBtn">Ya, Hapus</a>
+          
+          <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-light rounded-pill px-4 fw-semibold text-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
+              <i class="bi bi-check2"></i>
+              <span>Simpan Jadwal</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
-<!-- JavaScript -->
+
+  <!-- Modal Konfirmasi Hapus (Redesigned) -->
+  <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content border-0 shadow-lg text-center p-4" style="border-radius: 24px;">
+        <div class="mx-auto mb-3" style="width: 58px; height: 58px; border-radius: 18px; background: #fee2e2; color: #ef4444; display: grid; place-items: center; font-size: 1.6rem;">
+          <i class="bi bi-trash3-fill"></i>
+        </div>
+        <h5 class="fw-bold text-dark mb-1" id="deleteConfirmTitle">Hapus Jadwal?</h5>
+        <p class="text-muted small mb-4" id="deleteConfirmMessage">Apakah Anda yakin ingin menghapus jadwal pakan ini? Tindakan ini tidak dapat dibatalkan.</p>
+        <div class="d-flex justify-content-center gap-2">
+          <button type="button" class="btn btn-light rounded-pill px-4 fw-semibold text-secondary" data-bs-dismiss="modal">Batal</button>
+          <a href="#" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" id="confirmDeleteBtn">Ya, Hapus</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    function updateWaktu() {
-      const now = new Date();
-      document.getElementById("jam").textContent = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-      document.getElementById("tanggal").textContent = now.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-    }
+    (() => {
+      const scheduleModalEl = document.getElementById("scheduleModal");
+      const scheduleModal = scheduleModalEl ? new bootstrap.Modal(scheduleModalEl) : null;
+      const deleteConfirmModalEl = document.getElementById("deleteConfirmModal");
+      const deleteConfirmModal = deleteConfirmModalEl ? new bootstrap.Modal(deleteConfirmModalEl) : null;
 
-    setInterval(updateWaktu, 1000);
-    updateWaktu();
+      const formAction = document.getElementById("formAction");
+      const scheduleId = document.getElementById("scheduleId");
+      const scheduleWaktu = document.getElementById("scheduleWaktu");
+      const scheduleModalTitle = document.getElementById("scheduleModalTitle");
+      const scheduleModalSubtitle = document.getElementById("scheduleModalSubtitle");
+      const allDaysCheckbox = document.getElementById("allDays");
+      const dayCheckboxes = document.querySelectorAll(".day-checkbox");
+      const scheduleResetBtn = document.getElementById("scheduleResetBtn");
 
-    const scheduleModal = document.getElementById("scheduleModal");
-    const closeScheduleModalBtn = document.getElementById("closeScheduleModal");
-    const scheduleResetBtn = document.getElementById("scheduleResetBtn");
-    const scheduleTypeButtons = document.querySelectorAll(".schedule-type-btn");
-    const scheduleTypeIcon = document.getElementById("scheduleTypeIcon");
-    const scheduleUnit = document.getElementById("scheduleUnit");
-    const scheduleCheckboxes = document.querySelectorAll(".schedule-day input");
-    const allDaysCheckbox = document.getElementById("allDays");
-    const scheduleJenis = document.getElementById("scheduleJenis");
-    const formAction = document.getElementById("formAction");
-    const scheduleId = document.getElementById("scheduleId");
-    const scheduleWaktu = document.getElementById("scheduleWaktu");
-    const scheduleJumlah = document.getElementById("scheduleJumlah");
-    const scheduleCatatan = document.getElementById("scheduleCatatan");
-    const scheduleModalTitle = document.getElementById("scheduleModalTitle");
-    const deleteConfirmModal = document.getElementById("deleteConfirmModal");
-    const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
-    const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-    const deleteConfirmMessage = document.getElementById("deleteConfirmMessage");
-    const selectAllSchedules = document.getElementById("selectAllSchedules");
-    const scheduleRowCheckboxes = document.querySelectorAll(".schedule-row-checkbox");
-    const deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
-    const bulkDeleteForm = document.getElementById("bulkDeleteForm");
-    const logStatusAlert = document.getElementById("logStatusAlert");
-    const closeStatusAlert = document.getElementById("closeStatusAlert");
-    const feedPercent = document.getElementById("feedPercent");
-    const waterPercent = document.getElementById("waterPercent");
-    const feedStockText = document.getElementById("feedStockText");
-    const waterStockText = document.getElementById("waterStockText");
-    const feedProgressBar = document.getElementById("feedProgressBar");
-    const waterProgressBar = document.getElementById("waterProgressBar");
-
-    const stockState = {
-      feed: { current: 15, max: 20, step: 1, unit: "kg", percentEl: feedPercent, stockEl: feedStockText, progressEl: feedProgressBar },
-      water: { current: 12, max: 20, step: 0.8, unit: "L", percentEl: waterPercent, stockEl: waterStockText, progressEl: waterProgressBar }
-    };
-
-    function renderStock(type) {
-      const stock = stockState[type];
-      const percent = Math.max(0, (stock.current / stock.max) * 100);
-      stock.percentEl.textContent = `${Math.round(percent)}%`;
-      stock.stockEl.textContent = `${stock.current.toFixed(1)} / ${stock.max.toFixed(1)} ${stock.unit}`;
-      stock.progressEl.style.width = `${percent}%`;
-    }
-
-    function useStock(type) {
-      stockState[type].current = Math.max(0, stockState[type].current - stockState[type].step);
-      renderStock(type);
-    }
-
-    function setScheduleType(type) {
-      const isPakan = type === "Pakan";
-      scheduleJenis.value = type;
-      scheduleTypeButtons.forEach((button) => button.classList.toggle("active", button.dataset.type === type));
-      scheduleModal.classList.toggle("is-minum", !isPakan);
-      scheduleTypeIcon.innerHTML = isPakan ? '<i class="fa-solid fa-bowl-food"></i>' : '<i class="bi bi-droplet-fill"></i>';
-      scheduleUnit.textContent = isPakan ? "Kg" : "L";
-    }
-
-    function clearForm() {
-      formAction.value = "create";
-      scheduleId.value = "";
-      scheduleWaktu.value = "08:00";
-      scheduleJumlah.value = "";
-      scheduleCatatan.value = "";
-      scheduleModalTitle.textContent = "Tambah Jadwal";
-      scheduleCheckboxes.forEach((checkbox) => checkbox.checked = false);
-      setScheduleType("Pakan");
-    }
-
-    function syncScheduleDayState(changedCheckbox = null) {
-      const dayCheckboxes = Array.from(scheduleCheckboxes).filter((checkbox) => checkbox.value !== "Semua Hari");
-      if (!allDaysCheckbox) {
-        return;
-      }
-
-      if (changedCheckbox === allDaysCheckbox) {
-        dayCheckboxes.forEach((checkbox) => {
-          checkbox.checked = allDaysCheckbox.checked;
+      const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+      const deleteConfirmMessage = document.getElementById("deleteConfirmMessage");
+      const selectAllSchedules = document.getElementById("selectAllSchedules");
+      const scheduleRowCheckboxes = document.querySelectorAll(".schedule-row-checkbox");
+      const deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
+      const bulkDeleteForm = document.getElementById("bulkDeleteForm");
+      const logStatusAlert = document.getElementById("logStatusAlert");
+      const closeStatusAlert = document.getElementById("closeStatusAlert");
+      const feedActionBtn = document.getElementById("feedActionBtn");
+      if (feedActionBtn) {
+        feedActionBtn.addEventListener("click", async () => {
+          feedActionBtn.disabled = true;
+          feedActionBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Mengeluarkan Pakan...`;
+          try {
+            await fetch("../proses/toggle_aktuator.php", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ actuator: "motor_pakan", value: 1 })
+            });
+            setTimeout(() => {
+              feedActionBtn.disabled = false;
+              feedActionBtn.innerHTML = `<i class="fa-solid fa-play me-2"></i>Beri Pakan Sekarang`;
+              window.location.reload();
+            }, 1200);
+          } catch (e) {
+            feedActionBtn.disabled = false;
+            feedActionBtn.innerHTML = `<i class="fa-solid fa-play me-2"></i>Beri Pakan Sekarang`;
+          }
         });
-        return;
       }
 
-      const allChecked = dayCheckboxes.every((checkbox) => checkbox.checked);
-      const anyUnchecked = dayCheckboxes.some((checkbox) => !checkbox.checked);
-
-      if (allChecked) {
-        allDaysCheckbox.checked = true;
-      } else if (anyUnchecked) {
-        allDaysCheckbox.checked = false;
+      function clearForm() {
+        formAction.value = "create";
+        scheduleId.value = "";
+        scheduleWaktu.value = "08:00";
+        scheduleModalTitle.textContent = "Tambah Jadwal Pakan";
+        if (scheduleModalSubtitle) scheduleModalSubtitle.textContent = "Atur waktu dan hari operasional pakan otomatis";
+        if (allDaysCheckbox) allDaysCheckbox.checked = true;
+        dayCheckboxes.forEach((cb) => cb.checked = true);
       }
-    }
 
-    function openScheduleModal() {
-      scheduleModal.classList.remove("hidden");
-      document.body.classList.add("modal-open");
-      scheduleModal.setAttribute("aria-hidden", "false");
-    }
-
-    function closeScheduleModal() {
-      scheduleModal.classList.add("hidden");
-      document.body.classList.remove("modal-open");
-      scheduleModal.setAttribute("aria-hidden", "true");
-    }
-
-    function syncBulkDeleteState() {
-      const checkedCount = Array.from(scheduleRowCheckboxes).filter((item) => item.checked).length;
-
-      if (deleteSelectedBtn) {
-        deleteSelectedBtn.disabled = checkedCount === 0;
-        deleteSelectedBtn.querySelector("span").textContent = checkedCount > 0 ? `Hapus (${checkedCount})` : "Hapus";
-      }
-    }
-
-    function openDeleteModal(href, isBulkDelete = false) {
-      confirmDeleteBtn.setAttribute("href", href);
-      confirmDeleteBtn.dataset.bulkDelete = isBulkDelete ? "true" : "false";
-      deleteConfirmMessage.textContent = isBulkDelete
-        ? "Apakah Anda yakin ingin menghapus semua jadwal yang dipilih? Tindakan ini tidak dapat dibatalkan dan data akan hilang secara permanen."
-        : "Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan dan data akan hilang secara permanen.";
-      deleteConfirmModal.classList.remove("hidden");
-      deleteConfirmModal.setAttribute("aria-hidden", "false");
-      document.body.classList.add("modal-open");
-    }
-
-    function closeDeleteModal() {
-      deleteConfirmModal.classList.add("hidden");
-      deleteConfirmModal.setAttribute("aria-hidden", "true");
-      confirmDeleteBtn.setAttribute("href", "#");
-      confirmDeleteBtn.dataset.bulkDelete = "false";
-      document.body.classList.remove("modal-open");
-    }
-
-    document.querySelector(".js-open-schedule-modal").addEventListener("click", () => {
-      clearForm();
-      openScheduleModal();
-    });
-    closeScheduleModalBtn.addEventListener("click", closeScheduleModal);
-    scheduleModal.addEventListener("click", (event) => { if (event.target === scheduleModal) closeScheduleModal(); });
-    document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !scheduleModal.classList.contains("hidden")) closeScheduleModal(); });
-    scheduleTypeButtons.forEach((button) => button.addEventListener("click", () => setScheduleType(button.dataset.type)));
-    scheduleResetBtn.addEventListener("click", () => {
-      scheduleCheckboxes.forEach((checkbox) => checkbox.checked = false);
-      syncScheduleDayState();
-    });
-    scheduleCheckboxes.forEach((checkbox) => {
-      checkbox.addEventListener("change", () => syncScheduleDayState(checkbox));
-    });
-    document.getElementById("feedActionBtn").addEventListener("click", () => useStock("feed"));
-    document.getElementById("waterActionBtn").addEventListener("click", () => useStock("water"));
-    document.querySelectorAll(".js-open-delete-modal").forEach((button) => {
-      button.addEventListener("click", (event) => {
-        event.preventDefault();
-        openDeleteModal(button.dataset.deleteHref);
-      });
-    });
-    cancelDeleteBtn.addEventListener("click", closeDeleteModal);
-    deleteConfirmModal.addEventListener("click", (event) => { if (event.target === deleteConfirmModal) closeDeleteModal(); });
-    if (selectAllSchedules) {
-      selectAllSchedules.addEventListener("change", () => {
-        scheduleRowCheckboxes.forEach((checkbox) => {
-          checkbox.checked = selectAllSchedules.checked;
+      // Sync checkbox Hari
+      if (allDaysCheckbox) {
+        allDaysCheckbox.addEventListener("change", () => {
+          dayCheckboxes.forEach((cb) => {
+            cb.checked = allDaysCheckbox.checked;
+          });
         });
-        syncBulkDeleteState();
-      });
-    }
-    scheduleRowCheckboxes.forEach((checkbox) => {
-      checkbox.addEventListener("change", () => {
-        if (selectAllSchedules) {
-          selectAllSchedules.checked = Array.from(scheduleRowCheckboxes).every((item) => item.checked);
-        }
-        syncBulkDeleteState();
-      });
-    });
-    if (bulkDeleteForm) {
-      bulkDeleteForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const hasSelected = Array.from(scheduleRowCheckboxes).some((item) => item.checked);
-        if (hasSelected) {
-          openDeleteModal("#", true);
-        }
-      });
-    }
-    confirmDeleteBtn.addEventListener("click", (event) => {
-      if (confirmDeleteBtn.dataset.bulkDelete === "true") {
-        event.preventDefault();
-        closeDeleteModal();
-        bulkDeleteForm.submit();
       }
-    });
 
-    document.querySelectorAll(".js-edit-schedule").forEach((button) => {
-      button.addEventListener("click", () => {
-        formAction.value = "update";
-        scheduleId.value = button.dataset.id;
-        scheduleWaktu.value = button.dataset.waktu;
-        scheduleJumlah.value = button.dataset.jumlah;
-        scheduleCatatan.value = button.dataset.catatan;
-        scheduleModalTitle.textContent = "Edit Jadwal";
-        setScheduleType(button.dataset.jenis);
-        const days = button.dataset.hari.split(",").map((day) => day.trim());
-        scheduleCheckboxes.forEach((checkbox) => checkbox.checked = days.includes(checkbox.value));
-        syncScheduleDayState();
-        openScheduleModal();
-      });
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !deleteConfirmModal.classList.contains("hidden")) closeDeleteModal();
-    });
-
-    if (closeStatusAlert && logStatusAlert) {
-      closeStatusAlert.addEventListener("click", () => {
-        logStatusAlert.classList.add("is-closing");
-        window.setTimeout(() => {
-          logStatusAlert.remove();
-        }, 180);
+      dayCheckboxes.forEach((cb) => {
+        cb.addEventListener("change", () => {
+          const allChecked = Array.from(dayCheckboxes).every((item) => item.checked);
+          if (allDaysCheckbox) {
+            allDaysCheckbox.checked = allChecked;
+          }
+        });
       });
 
-      window.setTimeout(() => {
-        if (document.body.contains(logStatusAlert)) {
+      if (scheduleResetBtn) {
+        scheduleResetBtn.addEventListener("click", () => {
+          if (allDaysCheckbox) allDaysCheckbox.checked = true;
+          dayCheckboxes.forEach((cb) => cb.checked = true);
+        });
+      }
+
+      // Buka modal Tambah Jadwal
+      const openModalBtn = document.querySelector(".js-open-schedule-modal");
+      if (openModalBtn) {
+        openModalBtn.addEventListener("click", () => {
+          clearForm();
+          if (scheduleModal) scheduleModal.show();
+        });
+      }
+
+      // Edit Jadwal
+      document.querySelectorAll(".js-edit-schedule").forEach((button) => {
+        button.addEventListener("click", () => {
+          formAction.value = "update";
+          scheduleId.value = button.dataset.id;
+          scheduleWaktu.value = button.dataset.waktu;
+          scheduleModalTitle.textContent = "Edit Jadwal Pakan";
+          if (scheduleModalSubtitle) scheduleModalSubtitle.textContent = "Ubah waktu dan hari jadwal pakan";
+
+          const rawHari = button.dataset.hari || "Semua Hari";
+          const days = rawHari.split(",").map((d) => d.trim());
+          const isAll = days.includes("Semua Hari") || days.length === 7;
+
+          if (allDaysCheckbox) allDaysCheckbox.checked = isAll;
+          dayCheckboxes.forEach((cb) => {
+            cb.checked = isAll || days.includes(cb.value);
+          });
+
+          if (scheduleModal) scheduleModal.show();
+        });
+      });
+
+      // Sync bulk delete
+      function syncBulkDeleteState() {
+        const checkedCount = Array.from(scheduleRowCheckboxes).filter((item) => item.checked).length;
+        if (deleteSelectedBtn) {
+          deleteSelectedBtn.disabled = checkedCount === 0;
+          deleteSelectedBtn.querySelector("span").textContent = checkedCount > 0 ? `Hapus Terpilih (${checkedCount})` : "Hapus Terpilih";
+        }
+      }
+
+      if (selectAllSchedules) {
+        selectAllSchedules.addEventListener("change", () => {
+          scheduleRowCheckboxes.forEach((checkbox) => {
+            checkbox.checked = selectAllSchedules.checked;
+          });
+          syncBulkDeleteState();
+        });
+      }
+
+      scheduleRowCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+          if (selectAllSchedules) {
+            selectAllSchedules.checked = Array.from(scheduleRowCheckboxes).every((item) => item.checked);
+          }
+          syncBulkDeleteState();
+        });
+      });
+
+      // Delete Modal
+      document.querySelectorAll(".js-open-delete-modal").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          const href = button.dataset.deleteHref || button.getAttribute("href");
+          confirmDeleteBtn.setAttribute("href", href);
+          confirmDeleteBtn.dataset.bulkDelete = "false";
+          deleteConfirmMessage.textContent = "Apakah Anda yakin ingin menghapus jadwal pakan ini? Tindakan ini tidak dapat dibatalkan.";
+          if (deleteConfirmModal) deleteConfirmModal.show();
+        });
+      });
+
+      if (bulkDeleteForm) {
+        bulkDeleteForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const hasSelected = Array.from(scheduleRowCheckboxes).some((item) => item.checked);
+          if (hasSelected) {
+            confirmDeleteBtn.setAttribute("href", "#");
+            confirmDeleteBtn.dataset.bulkDelete = "true";
+            deleteConfirmMessage.textContent = "Apakah Anda yakin ingin menghapus semua jadwal pakan yang dipilih? Tindakan ini tidak dapat dibatalkan.";
+            if (deleteConfirmModal) deleteConfirmModal.show();
+          }
+        });
+      }
+
+      if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener("click", (event) => {
+          if (confirmDeleteBtn.dataset.bulkDelete === "true") {
+            event.preventDefault();
+            if (deleteConfirmModal) deleteConfirmModal.hide();
+            bulkDeleteForm.submit();
+          }
+        });
+      }
+
+      if (closeStatusAlert) {
+        closeStatusAlert.addEventListener("click", () => {
           logStatusAlert.classList.add("is-closing");
-          window.setTimeout(() => {
-            if (document.body.contains(logStatusAlert)) {
-              logStatusAlert.remove();
-            }
-          }, 180);
-        }
-      }, 4200);
-    }
-
-    renderStock("feed");
-    renderStock("water");
+          setTimeout(() => logStatusAlert.remove(), 260);
+        });
+      }
+    })();
   </script>
 </body>
 </html>

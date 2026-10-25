@@ -29,8 +29,8 @@ function ambil_log_harian(mysqli $koneksi, string $search = '', int $page = 1, i
             OR DATE_FORMAT(lh.created_at, '%Y-%m-%d') LIKE ?
             OR lh.suhu LIKE ?
             OR lh.kelembaban LIKE ?
-            OR lh.pakan LIKE ?
-            OR lh.minum LIKE ?
+            OR lh.cahaya LIKE ?
+            OR lh.level_air LIKE ?
             OR lh.lampu LIKE ?
             OR DAYNAME(lh.created_at) LIKE ?";
         $keyword = '%' . $search . '%';

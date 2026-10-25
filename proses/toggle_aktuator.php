@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 
@@ -125,6 +125,13 @@ if ($executed) {
         'lampu' => 'Lampu Penerangan',
         'motor_pakan' => 'Motor Pakan',
     ];
+    if ($actuator === 'motor_pakan' && $value === 1) {
+        $feedLogStmt = mysqli_prepare($koneksi, "INSERT INTO log_pemberian_pakan (waktu, metode, status, keterangan) VALUES (NOW(), 'Manual', 'Berhasil', 'Pemberian pakan manual via dispenser')");
+        if ($feedLogStmt) {
+            mysqli_stmt_execute($feedLogStmt);
+        }
+    }
+
     $actionMsg = $actuatorNames[$actuator] . ' diubah ke ' . $labels[$actuator];
     $timeLabel = waktu_notifikasi();
     $notifStmt = mysqli_prepare($koneksi, "INSERT INTO notifikasi (pesan, tipe, waktu_label) VALUES (?, 'info', ?)");

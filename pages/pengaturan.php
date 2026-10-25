@@ -97,13 +97,13 @@ $umurAyamHari = max(0, (int) round((strtotime('today') - $tglMasukTs) / 86400));
             <div class="user-banner-meta mt-1">
               <span><i class="bi bi-envelope me-1"></i><span id="bannerEmail"><?= htmlspecialchars($userData['email'] ?? 'admin@chickguard.local', ENT_QUOTES, 'UTF-8') ?></span></span>
               <span class="mx-2">&bull;</span>
-              <span><i class="bi bi-shield-check text-white me-1"></i>Status: Terverifikasi</span>
+              <span><i class="bi bi-shield-check text-success me-1"></i>Status: Terverifikasi</span>
             </div>
           </div>
         </div>
         <div class="d-flex align-items-center gap-2">
-          <span class="badge bg-white text-dark rounded-pill px-3 py-2 fw-semibold">
-            <i class="bi bi-cpu text-success me-1"></i> ChickGuard IoT Manager
+          <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background:#e6f7f8;color:#0d9488;border:1px solid #bce6eb;">
+            <i class="bi bi-cpu me-1"></i> ChickGuard IoT Manager
           </span>
         </div>
       </div>
@@ -116,7 +116,7 @@ $umurAyamHari = max(0, (int) round((strtotime('today') - $tglMasukTs) / 86400));
             <div class="settings-header">
               <div>
                 <h3 class="settings-title">
-                  <i class="bi bi-person-badge text-primary"></i>
+                  <i class="bi bi-person-badge" style="color:#0d9488;"></i>
                   <span>Pengaturan User</span>
                 </h3>
                 <p class="settings-subtitle">Atur username akun dan alamat email terdaftar</p>
@@ -159,7 +159,7 @@ $umurAyamHari = max(0, (int) round((strtotime('today') - $tglMasukTs) / 86400));
             <div class="settings-header">
               <div>
                 <h3 class="settings-title">
-                  <i class="bi bi-key-fill text-warning"></i>
+                  <i class="bi bi-shield-lock-fill" style="color:#496d74;"></i>
                   <span>Keamanan & Password</span>
                 </h3>
                 <p class="settings-subtitle">Perbarui password akun untuk menjaga keamanan akses</p>
@@ -223,7 +223,7 @@ $umurAyamHari = max(0, (int) round((strtotime('today') - $tglMasukTs) / 86400));
             <div class="settings-header">
               <div>
                 <h3 class="settings-title">
-                  <i class="bi bi-house-gear-fill text-success"></i>
+                  <i class="bi bi-house-gear-fill" style="color:#0d9488;"></i>
                   <span>Pengaturan Kandang & Umur Ayam</span>
                 </h3>
                 <p class="settings-subtitle">Atur nama kandang, tanggal masuk ayam untuk pelacakan umur ayam di dashboard, serta batas aman sensor</p>

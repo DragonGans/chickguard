@@ -1,4 +1,4 @@
-/* Shared styles used across multiple pages */
+﻿/* Shared styles used across multiple pages */
 
 body {
   margin: 0;
@@ -241,14 +241,20 @@ body.page-log-harian {
   flex: 1;
   min-width: 0;
   width: 100%;
-  padding: 0;
+  padding: 0 2rem 2rem 2rem;
 }
 
 .topbar {
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 4px 20px rgba(77, 109, 120, 0.16);
-  padding: 0.75rem 1.1rem;
-  margin: 0;
+  padding: 0.75rem 2rem;
+  margin: 0 -2rem 1.5rem -2rem;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(77, 109, 120, 0.12);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .topbar h1 {

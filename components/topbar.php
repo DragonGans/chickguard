@@ -1,15 +1,15 @@
 <?php
 $username = $_SESSION['username'] ?? 'admin';
-$userDisplayName = $_SESSION['nama_lengkap'] ?? null;
-if (!$userDisplayName && isset($koneksi) && $koneksi instanceof mysqli) {
-    $uStmt = mysqli_prepare($koneksi, "SELECT nama_lengkap, role FROM users WHERE username = ? LIMIT 1");
+if (isset($koneksi) && $koneksi instanceof mysqli) {
+    $uStmt = mysqli_prepare($koneksi, "SELECT username, role FROM users WHERE username = ? LIMIT 1");
     if ($uStmt) {
         mysqli_stmt_bind_param($uStmt, "s", $username);
         mysqli_stmt_execute($uStmt);
         $uRes = mysqli_stmt_get_result($uStmt);
         if ($uRow = mysqli_fetch_assoc($uRes)) {
-            if (!empty($uRow['nama_lengkap'])) {
-                $userDisplayName = $uRow['nama_lengkap'];
+            if (!empty($uRow['username'])) {
+                $username = $uRow['username'];
+                $_SESSION['username'] = $username;
             }
             if (!empty($uRow['role'])) {
                 $_SESSION['role'] = $uRow['role'];
@@ -17,11 +17,6 @@ if (!$userDisplayName && isset($koneksi) && $koneksi instanceof mysqli) {
         }
     }
 }
-if (!$userDisplayName) {
-    $userDisplayName = ($username === 'admin') ? 'Bima Apriliansyah' : ucfirst($username);
-}
-$_SESSION['nama_lengkap'] = $userDisplayName;
-$userShortName = explode(' ', trim($userDisplayName))[0] ?? ucfirst($username);
 $userRole = ucfirst($_SESSION['role'] ?? 'Admin');
 
 // Query notifikasi jika belum disiapkan di halaman pemanggil
@@ -59,10 +54,10 @@ if (!isset($unreadCount)) {
 }
 $unreadCount = (int) $unreadCount;
 
-$topbarTitle = $topbarTitle ?? ('Selamat Datang, ' . $userShortName . '!');
+$topbarTitle = $topbarTitle ?? ('Selamat Datang, ' . $username . '!');
 $topbarSubtitle = $topbarSubtitle ?? 'Pantau kondisi kandang ayam Anda secara real-time melalui dashboard IoT.';
 ?>
-<header class="topbar-modern">
+<header class="topbar-modern topbar">
   <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
     <!-- Left greeting -->
     <div class="topbar-greeting">
@@ -106,8 +101,7 @@ $topbarSubtitle = $topbarSubtitle ?? 'Pantau kondisi kandang ayam Anda secara re
           <i class="bi bi-person-fill"></i>
         </div>
         <div class="user-details">
-          <div class="user-name"><?= htmlspecialchars($userDisplayName, ENT_QUOTES, 'UTF-8') ?></div>
-          <div class="user-role"><?= htmlspecialchars($userRole, ENT_QUOTES, 'UTF-8') ?></div>
+          <div class="user-name"><?= htmlspecialchars($username, ENT_QUOTES, 'UTF-8') ?></div>
         </div>
       </div>
     </div>

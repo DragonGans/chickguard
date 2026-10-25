@@ -1,9 +1,6 @@
 /* Pencahayaan page styles */
 
-body.page-pencahayaan .topbar,
-body.page-log-harian .topbar {
-  padding: 0.7rem 1rem;
-}
+
 
 body.page-pencahayaan .topbar p,
 body.page-log-harian .topbar p {

@@ -15,8 +15,6 @@ $activePage = 'aktuator';
 
 // User info
 $username = $_SESSION['username'] ?? 'admin';
-$userDisplayName = ($username === 'admin') ? 'Bima Apriliansyah' : ucfirst($username);
-$userShortName = ($username === 'admin') ? 'Bima' : ucfirst($username);
 
 $topbarTitle = 'Kontrol Aktuator IoT';
 $topbarSubtitle = 'Kontrol sakelar kipas, heater pemanas, pencahayaan, dan motor servo pakan secara real-time.';
@@ -283,6 +281,33 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
     <main class="main-content">
       <?php include '../components/topbar.php'; ?>
 
+            <!-- Bar Kontrol Aktuator (Nyalakan Semua Manual & Mode Otomatis) -->
+      <div class="actuator-control-bar p-3 p-md-4 mb-4 rounded-4 bg-white d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="control-bar-icon bg-success-subtle text-success">
+            <i class="bi bi-power fs-4"></i>
+          </div>
+          <div>
+            <h5 class="fw-bold mb-1 text-dark">Kontrol Perangkat Aktuator</h5>
+            <p class="text-muted small mb-0">Aktuator tetap bekerja secara otomatis sesuai sensor &amp; mikroklimat. Tersedia tombol khusus untuk menyalakan semua manual.</p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <button type="button" class="btn btn-success fw-bold px-3 py-2 rounded-pill d-inline-flex align-items-center gap-2 shadow-sm" id="btnNyalakanSemua">
+            <i class="bi bi-power fs-5"></i>
+            <span>Nyalakan Semua Manual</span>
+          </button>
+          <button type="button" class="btn btn-outline-danger fw-semibold px-3 py-2 rounded-pill d-inline-flex align-items-center gap-2" id="btnMatikanSemua">
+            <i class="bi bi-slash-circle fs-5"></i>
+            <span>Matikan Semua</span>
+          </button>
+          <button type="button" class="btn btn-outline-secondary fw-semibold px-3 py-2 rounded-pill d-inline-flex align-items-center gap-2" id="btnSinkronOtomasi">
+            <i class="bi bi-cpu fs-5"></i>
+            <span>Sinkronkan Otomasi</span>
+          </button>
+        </div>
+      </div>
+
       <!-- 4 Interactive Big Actuator Cards Grid -->
       <div class="row g-3 g-xl-4 mb-4">
         <!-- 1. Kipas Ventilasi -->
@@ -299,23 +324,11 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
             </div>
 
             <div class="actuator-device-title">Kipas Ventilasi</div>
-            <div class="actuator-device-sub">Exhaust & sirkulasi udara kandang</div>
 
-            <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="d-flex align-items-center gap-2 mt-auto pt-2">
               <span class="badge <?= !empty($actuators['kipas']) ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' ?> rounded-pill px-3 py-1 fw-bold" id="badge-kipas">
                 <?= !empty($actuators['kipas']) ? 'Menyala' : 'Mati' ?>
               </span>
-              <span class="text-muted small">Channel 1</span>
-            </div>
-
-            <div class="actuator-rule-box">
-              <i class="bi bi-info-circle text-primary me-1"></i>
-              <strong>Otomasi:</strong> Aktif saat suhu kandang melebihi <strong><?= (float) $settings['suhu_maks'] ?> &deg;C</strong> untuk mendinginkan suhu & membuang gas amonia.
-            </div>
-
-            <div class="actuator-meta-spec">
-              <span>Beban: <strong>45 Watt</strong></span>
-              <span>Tegangan: <strong>220V AC</strong></span>
             </div>
           </div>
         </div>
@@ -334,23 +347,11 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
             </div>
 
             <div class="actuator-device-title">Heater Pemanas</div>
-            <div class="actuator-device-sub">Pemanas induksi keramik DOC</div>
 
-            <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="d-flex align-items-center gap-2 mt-auto pt-2">
               <span class="badge <?= !empty($actuators['heater']) ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' ?> rounded-pill px-3 py-1 fw-bold" id="badge-heater">
                 <?= !empty($actuators['heater']) ? 'Menyala' : 'Mati' ?>
               </span>
-              <span class="text-muted small">Channel 2</span>
-            </div>
-
-            <div class="actuator-rule-box">
-              <i class="bi bi-info-circle text-warning me-1"></i>
-              <strong>Otomasi:</strong> Aktif saat suhu kandang turun di bawah <strong><?= (float) $settings['suhu_min'] ?> &deg;C</strong> untuk menjaga suhu tubuh anak ayam.
-            </div>
-
-            <div class="actuator-meta-spec">
-              <span>Beban: <strong>150 Watt</strong></span>
-              <span>Tegangan: <strong>220V AC</strong></span>
             </div>
           </div>
         </div>
@@ -369,23 +370,11 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
             </div>
 
             <div class="actuator-device-title">Lampu Penerangan</div>
-            <div class="actuator-device-sub">Penerangan LED stimulasi makan</div>
 
-            <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="d-flex align-items-center gap-2 mt-auto pt-2">
               <span class="badge <?= !empty($actuators['lampu']) ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' ?> rounded-pill px-3 py-1 fw-bold" id="badge-lampu">
                 <?= !empty($actuators['lampu']) ? 'Menyala' : 'Mati' ?>
               </span>
-              <span class="text-muted small">Channel 3</span>
-            </div>
-
-            <div class="actuator-rule-box">
-              <i class="bi bi-info-circle text-success me-1"></i>
-              <strong>Otomasi:</strong> Aktif jika intensitas cahaya kandang &lt; <strong><?= (float) $settings['cahaya_min'] ?> lux</strong> atau sesuai jadwal pencahayaan.
-            </div>
-
-            <div class="actuator-meta-spec">
-              <span>Beban: <strong>25 Watt</strong></span>
-              <a href="pencahayaan.php" class="text-decoration-none fw-semibold text-primary">Jadwal Lampu &rarr;</a>
             </div>
           </div>
         </div>
@@ -404,25 +393,11 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
             </div>
 
             <div class="actuator-device-title">Motor Dispenser Pakan</div>
-            <div class="actuator-device-sub">Motor servo feeder dispenser pakan</div>
 
-            <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="d-flex align-items-center gap-2 mt-auto pt-2">
               <span class="badge <?= !empty($actuators['motor_pakan']) ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' ?> rounded-pill px-3 py-1 fw-bold" id="badge-motor_pakan">
-                <?= !empty($actuators['motor_pakan']) ? 'Jadwal Aktif' : 'Mati' ?>
+                <?= !empty($actuators['motor_pakan']) ? 'Menyala' : 'Mati' ?>
               </span>
-              <span class="text-muted small">Channel 4</span>
-            </div>
-
-            <div class="actuator-rule-box">
-              <i class="bi bi-info-circle text-purple me-1"></i>
-              <strong>Otomasi:</strong> Siaga berputar otomatis sesuai daftar jadwal pakan harian kandang.
-            </div>
-
-            <div class="actuator-meta-spec">
-              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-0 fw-semibold" id="btnManualFeed" style="font-size:0.75rem;">
-                <i class="bi bi-play-circle me-1"></i> Beri Sekarang
-              </button>
-              <a href="pakan_minum.php" class="text-decoration-none fw-semibold text-primary">Jadwal &rarr;</a>
             </div>
           </div>
         </div>
@@ -436,13 +411,37 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
             <div class="panel-header d-flex justify-content-between align-items-center mb-3">
               <div class="panel-title d-flex align-items-center gap-2">
                 <i class="bi bi-command text-secondary"></i>
-                <span>Preset Kontrol Cepat & Modul Relay</span>
+                <span>Preset Kontrol Cepat &amp; Modul Relay</span>
               </div>
               <span class="badge bg-light text-secondary border px-3 py-1 rounded-pill">ESP32 220V Bus</span>
             </div>
 
             <!-- Quick Action Preset Buttons -->
             <div class="row g-3 mb-4">
+              <div class="col-12 col-sm-6">
+                <button type="button" class="preset-btn-modern" id="presetTurnOnAll">
+                  <div class="preset-icon-circle text-success">
+                    <i class="bi bi-power"></i>
+                  </div>
+                  <div>
+                    <div class="fw-bold text-success">Nyalakan Semua Manual</div>
+                    <div class="text-muted small" style="font-size:0.75rem;">Aktifkan seluruh relay seketika</div>
+                  </div>
+                </button>
+              </div>
+
+              <div class="col-12 col-sm-6">
+                <button type="button" class="preset-btn-modern preset-btn-danger" id="presetEmergencyStop">
+                  <div class="preset-icon-circle">
+                    <i class="bi bi-slash-circle"></i>
+                  </div>
+                  <div>
+                    <div class="fw-bold text-danger">Matikan Semua (Safety)</div>
+                    <div class="text-muted small" style="font-size:0.75rem;">Matikan seluruh relay sekaligus</div>
+                  </div>
+                </button>
+              </div>
+
               <div class="col-12 col-sm-6">
                 <button type="button" class="preset-btn-modern" id="presetHotWeather">
                   <div class="preset-icon-circle text-danger">
@@ -456,37 +455,13 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
               </div>
 
               <div class="col-12 col-sm-6">
-                <button type="button" class="preset-btn-modern" id="presetNightMode">
-                  <div class="preset-icon-circle text-primary">
-                    <i class="bi bi-moon-stars-fill"></i>
-                  </div>
-                  <div>
-                    <div class="fw-bold">Mode Malam Hari</div>
-                    <div class="text-muted small" style="font-size:0.75rem;">Lampu OFF &bull; Kipas Standby</div>
-                  </div>
-                </button>
-              </div>
-
-              <div class="col-12 col-sm-6">
                 <button type="button" class="preset-btn-modern" id="presetAllAuto">
-                  <div class="preset-icon-circle text-success">
+                  <div class="preset-icon-circle text-primary">
                     <i class="bi bi-cpu-fill"></i>
                   </div>
                   <div>
                     <div class="fw-bold">Sinkronkan Otomasi</div>
                     <div class="text-muted small" style="font-size:0.75rem;">Sesuaikan dengan sensor saat ini</div>
-                  </div>
-                </button>
-              </div>
-
-              <div class="col-12 col-sm-6">
-                <button type="button" class="preset-btn-modern preset-btn-danger" id="presetEmergencyStop">
-                  <div class="preset-icon-circle">
-                    <i class="bi bi-power"></i>
-                  </div>
-                  <div>
-                    <div class="fw-bold text-danger">Matikan Semua (Safety)</div>
-                    <div class="text-muted small" style="font-size:0.75rem;">Emergency shutdown seluruh relay</div>
                   </div>
                 </button>
               </div>
@@ -752,7 +727,13 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
           });
           const data = await res.json();
           if (data && data.success) {
-            updateActuatorUI(actuator, value, data.status_text);
+            if (data.actuators) {
+              for (const [k, v] of Object.entries(data.actuators)) {
+                updateActuatorUI(k, v);
+              }
+            } else {
+              updateActuatorUI(actuator, value, data.status_text);
+            }
             showToast(data.message || `${actuator} berhasil diubah.`, "success");
             
             // Tambahkan item log ke daftar
@@ -786,59 +767,44 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         });
       });
 
-      /* ================= Presets ================= */
-      // 1. Matikan Semua
-      const btnAllOff = document.getElementById("presetEmergencyStop");
-      if (btnAllOff) {
-        btnAllOff.addEventListener("click", () => {
-          ["kipas", "heater", "lampu", "motor_pakan"].forEach(act => {
-            sendToggle(act, 0);
-          });
-          showToast("Prosedur darurat: Semua aktuator dimatikan.", "warning");
-        });
+      /* ================= Master Controls & Presets ================= */
+      // 1. Nyalakan Semua Manual
+      const btnAllOn = document.getElementById("btnNyalakanSemua");
+      const presetAllOn = document.getElementById("presetTurnOnAll");
+      if (btnAllOn) {
+        btnAllOn.addEventListener("click", () => sendToggle("all", 1));
+      }
+      if (presetAllOn) {
+        presetAllOn.addEventListener("click", () => sendToggle("all", 1));
       }
 
-      // 2. Mode Cuaca Panas (Kipas ON, Heater OFF)
+      // 2. Matikan Semua
+      const btnAllOff = document.getElementById("btnMatikanSemua");
+      const presetAllOff = document.getElementById("presetEmergencyStop");
+      if (btnAllOff) {
+        btnAllOff.addEventListener("click", () => sendToggle("all", 0));
+      }
+      if (presetAllOff) {
+        presetAllOff.addEventListener("click", () => sendToggle("all", 0));
+      }
+
+      // 3. Sinkronkan Otomasi
+      const btnSync = document.getElementById("btnSinkronOtomasi");
+      const presetAuto = document.getElementById("presetAllAuto");
+      if (btnSync) {
+        btnSync.addEventListener("click", () => sendToggle("auto", 0));
+      }
+      if (presetAuto) {
+        presetAuto.addEventListener("click", () => sendToggle("auto", 0));
+      }
+
+      // 4. Mode Cuaca Panas (Kipas ON, Heater OFF)
       const btnHot = document.getElementById("presetHotWeather");
       if (btnHot) {
         btnHot.addEventListener("click", () => {
           sendToggle("kipas", 1);
           sendToggle("heater", 0);
           showToast("Mode Cuaca Panas diaktifkan: Kipas ON, Heater OFF.", "success");
-        });
-      }
-
-      // 3. Mode Malam (Lampu OFF, Kipas Auto)
-      const btnNight = document.getElementById("presetNightMode");
-      if (btnNight) {
-        btnNight.addEventListener("click", () => {
-          sendToggle("lampu", 0);
-          sendToggle("kipas", 0);
-          showToast("Mode Malam diaktifkan: Lampu dipadamkan.", "info");
-        });
-      }
-
-      // 4. Sinkronkan Otomasi
-      const btnAuto = document.getElementById("presetAllAuto");
-      if (btnAuto) {
-        btnAuto.addEventListener("click", () => {
-          showToast("Semua sakelar disinkronkan ke mode otomasi mikroklimat.", "success");
-        });
-      }
-
-      // 5. Beri Pakan Sekarang (Manual feed pulse)
-      const btnFeed = document.getElementById("btnManualFeed");
-      if (btnFeed) {
-        btnFeed.addEventListener("click", () => {
-          btnFeed.disabled = true;
-          btnFeed.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Memutar...`;
-          sendToggle("motor_pakan", 1);
-          setTimeout(() => {
-            sendToggle("motor_pakan", 1);
-            btnFeed.disabled = false;
-            btnFeed.innerHTML = `<i class="bi bi-play-circle me-1"></i> Beri Sekarang`;
-            showToast("Pakan berhasil dikeluarkan (Dispense 3 Detik selesai).", "success");
-          }, 3000);
         });
       }
 

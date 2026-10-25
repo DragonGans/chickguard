@@ -53,15 +53,26 @@ if ($action === 'delete_selected') {
 }
 
 $id = (int) ($_POST['id'] ?? 0);
-$jenis = $_POST['jenis'] ?? '';
+$jenis = 'Pakan';
 $waktu = $_POST['waktu'] ?? '';
 $jumlah = (float) ($_POST['jumlah'] ?? 0);
 $catatan = trim($_POST['catatan'] ?? '');
 $hariInput = $_POST['hari'] ?? [];
 $hari = in_array('Semua Hari', $hariInput, true) ? 'Semua Hari' : implode(', ', $hariInput);
 
-if (!in_array($jenis, ['Pakan', 'Minum'], true) || $waktu === '' || $jumlah <= 0 || $hari === '') {
+if ($waktu === '' || $hari === '') {
     redirect_pakan_minum('invalid');
+}
+
+if ($catatan === '') {
+    $hour = (int) substr($waktu, 0, 2);
+    if ($hour < 11) {
+        $catatan = 'Pakan Pagi';
+    } elseif ($hour < 15) {
+        $catatan = 'Pakan Siang';
+    } else {
+        $catatan = 'Pakan Sore';
+    }
 }
 
 if ($action === 'update' && $id > 0) {

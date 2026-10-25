@@ -15,8 +15,6 @@ $activePage = 'dashboard';
 
 // User info
 $username = $_SESSION['username'] ?? 'admin';
-$userDisplayName = ($username === 'admin') ? 'Bima Apriliansyah' : ucfirst($username);
-$userShortName = ($username === 'admin') ? 'Bima' : ucfirst($username);
 
 /* ----------------------------------------------------------------------------
  * Pengaturan / batas normal & tanggal masuk ayam (pengaturan_kandang)
@@ -55,7 +53,7 @@ if ($umurAyamHari <= 7) {
 $mingguKe = intdiv($umurAyamHari, 7) + 1;
 $tglMasukFormatted = date('d M Y', $tglMasukTs);
 
-$topbarTitle = 'Selamat Datang, ' . $userShortName . '!';
+$topbarTitle = 'Selamat Datang, ' . $username . '!';
 $topbarSubtitle = 'Pantau kondisi ' . htmlspecialchars($settings['nama_kandang']) . ' • Umur Ayam: ' . $umurAyamHari . ' Hari (' . $faseAyam . ') secara real-time.';
 
 /* ----------------------------------------------------------------------------
@@ -380,83 +378,58 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
             </div>
           </div>
 
-          <!-- Right Column (Kontrol Aktuator + Jadwal Pakan) -->
-          <div class="col-12 col-xl-4" id="aktuator-section">
+          <!-- Right Column (Status Kandang + Jadwal Pakan) -->
+          <div class="col-12 col-xl-4" id="pengaturan-section">
             <div class="d-flex flex-column gap-3 gap-xl-4 h-100">
-              <!-- Kontrol Aktuator -->
-              <div class="dashboard-panel actuator-panel">
-                <div class="panel-header d-flex align-items-center gap-2">
-                  <i class="fa-solid fa-gear text-secondary"></i>
-                  <span class="panel-title">Kontrol Aktuator</span>
+              <!-- Status Kandang -->
+              <div class="dashboard-panel status-panel">
+                <div class="panel-header d-flex justify-content-between align-items-center mb-3">
+                  <div class="panel-title d-flex align-items-center gap-2">
+                    <i class="bi bi-house-door-fill text-secondary"></i>
+                    <span>Status Kandang</span>
+                  </div>
+                  <a href="pengaturan.php" class="panel-gear-btn text-decoration-none" title="Pengaturan Sistem & Akun">
+                    <i class="bi bi-gear"></i>
+                  </a>
                 </div>
 
-                <div class="actuator-list mt-3 d-flex flex-column gap-3">
-                  <!-- Kipas -->
-                  <div class="actuator-row d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="actuator-icon-box box-fan">
-                        <i class="fa-solid fa-fan"></i>
-                      </div>
-                      <div>
-                        <div class="actuator-name">Kipas</div>
-                        <div class="actuator-state" id="state-kipas"><?= !empty($actuators['kipas']) ? 'Menyala' : 'Mati' ?></div>
-                      </div>
+                <div class="status-block-wrapper d-flex flex-column gap-3">
+                  <!-- Umur Ayam -->
+                  <div class="status-subblock">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <div class="subblock-heading">Umur Ayam</div>
+                      <span class="badge <?= $faseBadgeClass ?> rounded-pill px-2.5 py-1 fw-semibold small">Fase <?= $faseAyam ?></span>
                     </div>
-                    <label class="switch-ios">
-                      <input type="checkbox" id="toggle-kipas" data-actuator="kipas" <?= !empty($actuators['kipas']) ? 'checked' : '' ?>>
-                      <span class="slider round"></span>
-                    </label>
+                    <div class="status-alert-box d-flex align-items-center justify-content-between" style="background:#f0fdf4;border:1px solid #dcfce7;box-shadow:0 3px 10px rgba(16, 185, 129, 0.08);">
+                      <div class="d-flex align-items-center gap-2">
+                        <div style="width:36px;height:36px;border-radius:10px;background:#dcfce7;color:#166534;display:grid;place-items:center;font-size:1.1rem;flex-shrink:0;">
+                          <i class="bi bi-calendar-check-fill"></i>
+                        </div>
+                        <div>
+                          <div class="fw-bold text-dark fs-6" id="dashUmurText"><?= $umurAyamHari ?> Hari</div>
+                          <div class="text-muted" style="font-size:0.72rem;">Masuk: <?= $tglMasukFormatted ?></div>
+                        </div>
+                      </div>
+                      <span class="badge bg-white text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold" style="font-size:0.75rem;">
+                        Minggu ke-<?= $mingguKe ?>
+                      </span>
+                    </div>
                   </div>
 
-                  <!-- Heater -->
-                  <div class="actuator-row d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="actuator-icon-box box-heater">
-                        <i class="fa-solid fa-temperature-arrow-up"></i>
-                      </div>
-                      <div>
-                        <div class="actuator-name">Heater</div>
-                        <div class="actuator-state" id="state-heater"><?= !empty($actuators['heater']) ? 'Menyala' : 'Mati' ?></div>
-                      </div>
+                  <div class="status-subblock">
+                    <div class="subblock-heading mb-2">Kondisi Kandang</div>
+                    <div class="status-alert-box <?= $statKandang['kondisi']['class'] ?> d-flex align-items-start gap-2" id="kondisiKandangBox">
+                      <i class="bi <?= $statKandang['kondisi']['class'] === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill' ?> fs-5 <?= $statKandang['kondisi']['class'] === 'success' ? 'text-success' : 'text-warning' ?>" id="kondisiIcon"></i>
+                      <span class="status-desc" id="kondisiText"><?= $statKandang['kondisi']['text'] ?></span>
                     </div>
-                    <label class="switch-ios">
-                      <input type="checkbox" id="toggle-heater" data-actuator="heater" <?= !empty($actuators['heater']) ? 'checked' : '' ?>>
-                      <span class="slider round"></span>
-                    </label>
                   </div>
 
-                  <!-- Lampu -->
-                  <div class="actuator-row d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="actuator-icon-box box-lamp">
-                        <i class="bi bi-lightbulb-fill"></i>
-                      </div>
-                      <div>
-                        <div class="actuator-name">Lampu</div>
-                        <div class="actuator-state" id="state-lampu"><?= !empty($actuators['lampu']) ? 'Menyala' : 'Mati' ?></div>
-                      </div>
+                  <div class="status-subblock">
+                    <div class="subblock-heading mb-2">Tips</div>
+                    <div class="status-alert-box info d-flex align-items-start gap-2" id="tipsBox">
+                      <i class="bi bi-lightbulb-fill text-warning fs-5 flex-shrink-0 mt-1"></i>
+                      <span class="tips-desc" id="tipsText"><?= $statKandang['tips'] ?></span>
                     </div>
-                    <label class="switch-ios">
-                      <input type="checkbox" id="toggle-lampu" data-actuator="lampu" <?= !empty($actuators['lampu']) ? 'checked' : '' ?>>
-                      <span class="slider round"></span>
-                    </label>
-                  </div>
-
-                  <!-- Motor Pakan -->
-                  <div class="actuator-row d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="actuator-icon-box box-feeder">
-                        <i class="fa-solid fa-cubes-stacked"></i>
-                      </div>
-                      <div>
-                        <div class="actuator-name">Motor Pakan</div>
-                        <div class="actuator-state" id="state-motor_pakan"><?= !empty($actuators['motor_pakan']) ? 'Jadwal Aktif' : 'Mati' ?></div>
-                      </div>
-                    </div>
-                    <label class="switch-ios">
-                      <input type="checkbox" id="toggle-motor_pakan" data-actuator="motor_pakan" <?= !empty($actuators['motor_pakan']) ? 'checked' : '' ?>>
-                      <span class="slider round"></span>
-                    </label>
                   </div>
                 </div>
               </div>
@@ -497,9 +470,92 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
           </div>
         </div>
 
-        <!-- Bottom Row (Log Data Terbaru, Status Kandang, Notifikasi Terbaru) -->
+        <!-- Bottom Row (Kontrol Aktuator, Log Data Terbaru, Notifikasi Terbaru) -->
         <div class="row g-3 g-xl-4">
-          <!-- Log Data Terbaru -->
+          <!-- 1. Kontrol Aktuator (Left Column) -->
+          <div class="col-12 col-xl-4" id="aktuator-section">
+            <div class="dashboard-panel actuator-panel h-100">
+              <div class="panel-header d-flex justify-content-between align-items-center mb-3">
+                <div class="panel-title d-flex align-items-center gap-2">
+                  <i class="fa-solid fa-sliders text-secondary"></i>
+                  <span>Kontrol Aktuator</span>
+                </div>
+                <a href="aktuator.php" class="panel-link">Lihat Semua</a>
+              </div>
+
+              <div class="actuator-list mt-3 d-flex flex-column gap-3">
+                <!-- Kipas -->
+                <div class="actuator-row d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="actuator-icon-box box-fan">
+                      <i class="fa-solid fa-fan"></i>
+                    </div>
+                    <div>
+                      <div class="actuator-name">Kipas</div>
+                      <div class="actuator-state" id="state-kipas"><?= !empty($actuators['kipas']) ? 'Menyala' : 'Mati' ?></div>
+                    </div>
+                  </div>
+                  <label class="switch-ios">
+                    <input type="checkbox" id="toggle-kipas" data-actuator="kipas" <?= !empty($actuators['kipas']) ? 'checked' : '' ?>>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <!-- Heater -->
+                <div class="actuator-row d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="actuator-icon-box box-heater">
+                      <i class="fa-solid fa-temperature-arrow-up"></i>
+                    </div>
+                    <div>
+                      <div class="actuator-name">Heater</div>
+                      <div class="actuator-state" id="state-heater"><?= !empty($actuators['heater']) ? 'Menyala' : 'Mati' ?></div>
+                    </div>
+                  </div>
+                  <label class="switch-ios">
+                    <input type="checkbox" id="toggle-heater" data-actuator="heater" <?= !empty($actuators['heater']) ? 'checked' : '' ?>>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <!-- Lampu -->
+                <div class="actuator-row d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="actuator-icon-box box-lamp">
+                      <i class="bi bi-lightbulb-fill"></i>
+                    </div>
+                    <div>
+                      <div class="actuator-name">Lampu</div>
+                      <div class="actuator-state" id="state-lampu"><?= !empty($actuators['lampu']) ? 'Menyala' : 'Mati' ?></div>
+                    </div>
+                  </div>
+                  <label class="switch-ios">
+                    <input type="checkbox" id="toggle-lampu" data-actuator="lampu" <?= !empty($actuators['lampu']) ? 'checked' : '' ?>>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <!-- Motor Pakan -->
+                <div class="actuator-row d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="actuator-icon-box box-feeder">
+                      <i class="fa-solid fa-cubes-stacked"></i>
+                    </div>
+                    <div>
+                      <div class="actuator-name">Motor Pakan</div>
+                      <div class="actuator-state" id="state-motor_pakan"><?= !empty($actuators['motor_pakan']) ? 'Jadwal Aktif' : 'Mati' ?></div>
+                    </div>
+                  </div>
+                  <label class="switch-ios">
+                    <input type="checkbox" id="toggle-motor_pakan" data-actuator="motor_pakan" <?= !empty($actuators['motor_pakan']) ? 'checked' : '' ?>>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Log Data Terbaru (Middle Column) -->
           <div class="col-12 col-xl-5">
             <div class="dashboard-panel log-panel h-100">
               <div class="panel-header d-flex justify-content-between align-items-center mb-3">
@@ -537,62 +593,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
             </div>
           </div>
 
-          <!-- Status Kandang -->
-          <div class="col-12 col-xl-4" id="pengaturan-section">
-            <div class="dashboard-panel status-panel h-100">
-              <div class="panel-header d-flex justify-content-between align-items-center mb-3">
-                <div class="panel-title d-flex align-items-center gap-2">
-                  <i class="bi bi-house-door-fill text-secondary"></i>
-                  <span>Status Kandang</span>
-                </div>
-                <a href="pengaturan.php" class="panel-gear-btn text-decoration-none" title="Pengaturan Sistem & Akun">
-                  <i class="bi bi-gear"></i>
-                </a>
-              </div>
-
-              <div class="status-block-wrapper d-flex flex-column gap-3">
-                <!-- Umur Ayam -->
-                <div class="status-subblock">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div class="subblock-heading">Umur Ayam</div>
-                    <span class="badge <?= $faseBadgeClass ?> rounded-pill px-2.5 py-1 fw-semibold small">Fase <?= $faseAyam ?></span>
-                  </div>
-                  <div class="status-alert-box d-flex align-items-center justify-content-between" style="background:#f0fdf4;border:1px solid #dcfce7;box-shadow:0 3px 10px rgba(16, 185, 129, 0.08);">
-                    <div class="d-flex align-items-center gap-2">
-                      <div style="width:36px;height:36px;border-radius:10px;background:#dcfce7;color:#166534;display:grid;place-items:center;font-size:1.1rem;flex-shrink:0;">
-                        <i class="bi bi-calendar-check-fill"></i>
-                      </div>
-                      <div>
-                        <div class="fw-bold text-dark fs-6" id="dashUmurText"><?= $umurAyamHari ?> Hari</div>
-                        <div class="text-muted" style="font-size:0.72rem;">Masuk: <?= $tglMasukFormatted ?></div>
-                      </div>
-                    </div>
-                    <span class="badge bg-white text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold" style="font-size:0.75rem;">
-                      Minggu ke-<?= $mingguKe ?>
-                    </span>
-                  </div>
-                </div>
-
-                <div class="status-subblock">
-                  <div class="subblock-heading mb-2">Kondisi Kandang</div>
-                  <div class="status-alert-box <?= $statKandang['kondisi']['class'] ?> d-flex align-items-start gap-2" id="kondisiKandangBox">
-                    <i class="bi <?= $statKandang['kondisi']['class'] === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill' ?> fs-5 <?= $statKandang['kondisi']['class'] === 'success' ? 'text-success' : 'text-warning' ?>" id="kondisiIcon"></i>
-                    <span class="status-desc" id="kondisiText"><?= $statKandang['kondisi']['text'] ?></span>
-                  </div>
-                </div>
-
-                <div class="status-subblock">
-                  <div class="subblock-heading mb-2">Tips</div>
-                  <div class="status-alert-box info d-flex align-items-start gap-2" id="tipsBox">
-                    <i class="bi bi-lightbulb-fill text-warning fs-5 flex-shrink-0 mt-1"></i>
-                    <span class="tips-desc" id="tipsText"><?= $statKandang['tips'] ?></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Notifikasi Terbaru -->
+          <!-- 3. Notifikasi Terbaru (Right Column) -->
           <div class="col-12 col-xl-3">
             <div class="dashboard-panel notif-panel h-100">
               <div class="panel-header d-flex justify-content-between align-items-center mb-3">
