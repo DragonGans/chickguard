@@ -38,9 +38,9 @@ $menuItems = [
   <div class="sidebar-panel">
     <div class="brand-wrap">
       <a href="dashboard.php" class="brand-link-modern d-flex align-items-center gap-2 text-decoration-none">
-        <img src="../assets/images/branding/icon.png" alt="chickgurd" class="brand-icon-main">
+        <img src="../assets/images/branding/icon.png" alt="ChickGuard" class="brand-icon-main">
         <div class="brand-meta-wrap">
-          <div class="brand-title-main">chickgurd</div>
+          <div class="brand-title-main">ChickGuard</div>
           <div class="brand-sub-main">Smart Chicken Coop IoT</div>
         </div>
       </a>
@@ -58,13 +58,11 @@ $menuItems = [
         <?php endforeach; ?>
       </ul>
 
-      <div class="sidebar-bottom-section mt-auto">
-        <div class="sidebar-logout">
-          <a class="nav-link logout-link js-open-logout-modal" href="../proses/logout.php">
-            <i class="bi bi-power"></i>
-            <span>Logout</span>
-          </a>
-        </div>
+      <div class="sidebar-logout">
+        <a class="nav-link logout-link js-open-logout-modal" href="../proses/logout.php">
+          <i class="bi bi-power"></i>
+          <span>Logout</span>
+        </a>
       </div>
     </div>
   </div>
