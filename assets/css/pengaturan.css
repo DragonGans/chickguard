@@ -237,3 +237,53 @@
   transform: translateY(0);
   pointer-events: auto;
 }
+
+/* Edit Profile Button in Banner */
+.btn-edit-profile {
+  background: #f0fdf9;
+  color: #0d9488;
+  border: 1px solid #ccfbf1;
+  border-radius: 999px;
+  padding: 0.35rem 0.95rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-edit-profile:hover {
+  background: #0d9488;
+  color: #ffffff;
+  border-color: #0d9488;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+}
+
+/* Modal Nav Pills */
+.modern-modal-pills {
+  background: #f1f5f9;
+  padding: 0.35rem;
+  border-radius: 14px;
+}
+
+.modern-modal-pills .nav-link {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.86rem;
+  border-radius: 10px;
+  padding: 0.5rem 1.15rem;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.modern-modal-pills .nav-link:hover {
+  color: #0d9488;
+}
+
+.modern-modal-pills .nav-link.active {
+  background: #ffffff;
+  color: #0d9488;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}

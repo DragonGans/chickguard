@@ -93,6 +93,10 @@ $umurAyamHari = max(0, (int) round((strtotime('today') - $tglMasukTs) / 86400));
             <div class="d-flex align-items-center gap-2 flex-wrap">
               <h2 class="user-banner-name mb-0" id="bannerUsernameDisplay"><?= htmlspecialchars($userData['username'], ENT_QUOTES, 'UTF-8') ?></h2>
               <span class="user-badge-role"><?= htmlspecialchars(strtoupper($userData['role'] ?? 'Admin'), ENT_QUOTES, 'UTF-8') ?></span>
+              <button type="button" class="btn-edit-profile ms-1" data-bs-toggle="modal" data-bs-target="#modalEditUser" title="Edit Profil & Keamanan">
+                <i class="bi bi-pencil-square"></i>
+                <span>Edit</span>
+              </button>
             </div>
             <div class="user-banner-meta mt-1">
               <span><i class="bi bi-envelope me-1"></i><span id="bannerEmail"><?= htmlspecialchars($userData['email'] ?? 'admin@chickguard.local', ENT_QUOTES, 'UTF-8') ?></span></span>
@@ -110,114 +114,7 @@ $umurAyamHari = max(0, (int) round((strtotime('today') - $tglMasukTs) / 86400));
 
       <!-- Settings Grid Sections -->
       <div class="row g-3 g-xl-4 mb-4">
-        <!-- 1. Pengaturan User (Username & Email) -->
-        <div class="col-12 col-lg-6">
-          <div class="settings-card">
-            <div class="settings-header">
-              <div>
-                <h3 class="settings-title">
-                  <i class="bi bi-person-badge" style="color:#0d9488;"></i>
-                  <span>Pengaturan User</span>
-                </h3>
-                <p class="settings-subtitle">Atur username akun dan alamat email terdaftar</p>
-              </div>
-            </div>
-
-            <form id="formProfilUser" autocomplete="off">
-              <input type="hidden" name="action" value="profil">
-
-              <div class="form-group-modern">
-                <label for="inputUsername" class="form-label-modern">
-                  <i class="bi bi-person text-muted"></i> Username Akun
-                </label>
-                <input type="text" class="form-control-modern" id="inputUsername" name="username" 
-                       value="<?= htmlspecialchars($userData['username'], ENT_QUOTES, 'UTF-8') ?>" required>
-                <div class="settings-help-text">Digunakan untuk login ke panel sistem (huruf, angka, underscore).</div>
-              </div>
-
-              <div class="form-group-modern">
-                <label for="inputEmail" class="form-label-modern">
-                  <i class="bi bi-envelope text-muted"></i> Alamat Email
-                </label>
-                <input type="email" class="form-control-modern" id="inputEmail" name="email" 
-                       value="<?= htmlspecialchars($userData['email'] ?? 'admin@chickguard.local', ENT_QUOTES, 'UTF-8') ?>" required>
-                <div class="settings-help-text">Alamat email aktif untuk pemberitahuan dan pemulihan akun.</div>
-              </div>
-
-              <div class="mt-auto pt-3">
-                <button type="submit" class="btn-settings-save" id="btnSaveProfil">
-                  <i class="bi bi-check-circle-fill"></i> Simpan Pengaturan User
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <!-- 2. Keamanan & Password -->
-        <div class="col-12 col-lg-6">
-          <div class="settings-card">
-            <div class="settings-header">
-              <div>
-                <h3 class="settings-title">
-                  <i class="bi bi-shield-lock-fill" style="color:#496d74;"></i>
-                  <span>Keamanan & Password</span>
-                </h3>
-                <p class="settings-subtitle">Perbarui password akun untuk menjaga keamanan akses</p>
-              </div>
-            </div>
-
-            <form id="formGantiPassword" autocomplete="off">
-              <input type="hidden" name="action" value="password">
-
-              <div class="form-group-modern">
-                <label for="inputPasswordLama" class="form-label-modern">
-                  <i class="bi bi-lock text-muted"></i> Password Saat Ini
-                </label>
-                <div class="input-group-modern">
-                  <input type="password" class="form-control-modern" id="inputPasswordLama" name="password_lama" 
-                         placeholder="Masukkan password saat ini" required>
-                  <button type="button" class="btn-toggle-eye" data-target="inputPasswordLama" aria-label="Toggle password">
-                    <i class="bi bi-eye"></i>
-                  </button>
-                </div>
-              </div>
-
-              <div class="form-group-modern">
-                <label for="inputPasswordBaru" class="form-label-modern">
-                  <i class="bi bi-shield-plus text-muted"></i> Password Baru
-                </label>
-                <div class="input-group-modern">
-                  <input type="password" class="form-control-modern" id="inputPasswordBaru" name="password_baru" 
-                         placeholder="Minimal 6 karakter" required minlength="6">
-                  <button type="button" class="btn-toggle-eye" data-target="inputPasswordBaru" aria-label="Toggle password">
-                    <i class="bi bi-eye"></i>
-                  </button>
-                </div>
-              </div>
-
-              <div class="form-group-modern">
-                <label for="inputKonfirmasiPassword" class="form-label-modern">
-                  <i class="bi bi-check-all text-muted"></i> Konfirmasi Password Baru
-                </label>
-                <div class="input-group-modern">
-                  <input type="password" class="form-control-modern" id="inputKonfirmasiPassword" name="konfirmasi_password" 
-                         placeholder="Ulangi password baru" required minlength="6">
-                  <button type="button" class="btn-toggle-eye" data-target="inputKonfirmasiPassword" aria-label="Toggle password">
-                    <i class="bi bi-eye"></i>
-                  </button>
-                </div>
-              </div>
-
-              <div class="mt-auto pt-3">
-                <button type="submit" class="btn-settings-secondary" id="btnSavePassword">
-                  <i class="bi bi-shield-lock-fill"></i> Perbarui Password
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <!-- 3. Pengaturan Kandang (Nama Kandang, Tanggal Masuk Ayam, Ambang Batas Sensor) -->
+        <!-- Pengaturan Kandang (Nama Kandang, Tanggal Masuk Ayam, Ambang Batas Sensor) -->
         <div class="col-12">
           <div class="settings-card">
             <div class="settings-header">
@@ -327,6 +224,141 @@ $umurAyamHari = max(0, (int) round((strtotime('today') - $tglMasukTs) / 86400));
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- Modal Popup: Pengaturan User & Keamanan Password -->
+  <div class="modal fade" id="modalEditUser" tabindex="-1" aria-labelledby="modalEditUserTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
+        <div class="modal-header border-0 pb-0 pt-4 px-4 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width: 48px; height: 48px; border-radius: 14px; background: #e6f7f8; color: #0d9488; display: grid; place-items: center; font-size: 1.35rem;">
+              <i class="bi bi-person-gear"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold text-dark mb-0" id="modalEditUserTitle">Pengaturan Profil & Keamanan</h5>
+              <small class="text-muted">Kelola akun pengguna dan kata sandi akses sistem</small>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body px-4 py-3">
+          <!-- Modern Pill Tabs -->
+          <ul class="nav nav-pills modern-modal-pills mb-3 gap-2" id="userSettingsTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="tab-profil-btn" data-bs-toggle="pill" data-bs-target="#tab-profil" type="button" role="tab" aria-controls="tab-profil" aria-selected="true">
+                <i class="bi bi-person-badge me-1.5"></i> Pengaturan User
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-password-btn" data-bs-toggle="pill" data-bs-target="#tab-password" type="button" role="tab" aria-controls="tab-password" aria-selected="false">
+                <i class="bi bi-shield-lock-fill me-1.5"></i> Keamanan & Password
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content pt-2" id="userSettingsTabContent">
+            <!-- 1. Tab Pengaturan User -->
+            <div class="tab-pane fade show active" id="tab-profil" role="tabpanel" aria-labelledby="tab-profil-btn">
+              <div class="mb-3">
+                <h6 class="fw-bold text-dark mb-1">Pengaturan User</h6>
+                <p class="text-muted small mb-0">Atur username akun dan alamat email terdaftar</p>
+              </div>
+
+              <form id="formProfilUser" autocomplete="off">
+                <input type="hidden" name="action" value="profil">
+
+                <div class="form-group-modern mb-3">
+                  <label for="inputUsername" class="form-label-modern fw-semibold text-dark small mb-1">
+                    <i class="bi bi-person text-muted"></i> Username Akun
+                  </label>
+                  <input type="text" class="form-control-modern" id="inputUsername" name="username" 
+                         value="<?= htmlspecialchars($userData['username'], ENT_QUOTES, 'UTF-8') ?>" required>
+                  <div class="settings-help-text">Digunakan untuk login ke panel sistem (huruf, angka, underscore).</div>
+                </div>
+
+                <div class="form-group-modern mb-4">
+                  <label for="inputEmail" class="form-label-modern fw-semibold text-dark small mb-1">
+                    <i class="bi bi-envelope text-muted"></i> Alamat Email
+                  </label>
+                  <input type="email" class="form-control-modern" id="inputEmail" name="email" 
+                         value="<?= htmlspecialchars($userData['email'] ?? 'admin@chickguard.local', ENT_QUOTES, 'UTF-8') ?>" required>
+                  <div class="settings-help-text">Alamat email aktif untuk pemberitahuan dan pemulihan akun.</div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                  <button type="button" class="btn btn-light rounded-pill px-4 fw-semibold text-secondary" data-bs-dismiss="modal">Tutup</button>
+                  <button type="submit" class="btn-settings-save rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2" id="btnSaveProfil">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Simpan Pengaturan User</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- 2. Tab Keamanan & Password -->
+            <div class="tab-pane fade" id="tab-password" role="tabpanel" aria-labelledby="tab-password-btn">
+              <div class="mb-3">
+                <h6 class="fw-bold text-dark mb-1">Keamanan & Password</h6>
+                <p class="text-muted small mb-0">Perbarui password akun untuk menjaga keamanan akses</p>
+              </div>
+
+              <form id="formGantiPassword" autocomplete="off">
+                <input type="hidden" name="action" value="password">
+
+                <div class="form-group-modern mb-3">
+                  <label for="inputPasswordLama" class="form-label-modern fw-semibold text-dark small mb-1">
+                    <i class="bi bi-lock text-muted"></i> Password Saat Ini
+                  </label>
+                  <div class="input-group-modern">
+                    <input type="password" class="form-control-modern" id="inputPasswordLama" name="password_lama" 
+                           placeholder="Masukkan password saat ini" required>
+                    <button type="button" class="btn-toggle-eye" data-target="inputPasswordLama" aria-label="Toggle password">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group-modern mb-3">
+                  <label for="inputPasswordBaru" class="form-label-modern fw-semibold text-dark small mb-1">
+                    <i class="bi bi-shield-plus text-muted"></i> Password Baru
+                  </label>
+                  <div class="input-group-modern">
+                    <input type="password" class="form-control-modern" id="inputPasswordBaru" name="password_baru" 
+                           placeholder="Minimal 6 karakter" required minlength="6">
+                    <button type="button" class="btn-toggle-eye" data-target="inputPasswordBaru" aria-label="Toggle password">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group-modern mb-4">
+                  <label for="inputKonfirmasiPassword" class="form-label-modern fw-semibold text-dark small mb-1">
+                    <i class="bi bi-check-all text-muted"></i> Konfirmasi Password Baru
+                  </label>
+                  <div class="input-group-modern">
+                    <input type="password" class="form-control-modern" id="inputKonfirmasiPassword" name="konfirmasi_password" 
+                           placeholder="Ulangi password baru" required minlength="6">
+                    <button type="button" class="btn-toggle-eye" data-target="inputKonfirmasiPassword" aria-label="Toggle password">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                  <button type="button" class="btn btn-light rounded-pill px-4 fw-semibold text-secondary" data-bs-dismiss="modal">Tutup</button>
+                  <button type="submit" class="btn-settings-secondary rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2" id="btnSavePassword">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    <span>Perbarui Password</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Floating Toast Notification -->
