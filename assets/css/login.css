@@ -662,7 +662,7 @@ body {
   }
 
   body.page-pencahayaan .add-btn,
-  body.page-pakan, body.page-pakan-minum .action-btn {
+  body.page-pakan .action-btn {
     width: 100%;
     min-width: 100%;
   }
@@ -671,11 +671,11 @@ body {
     min-width: 760px;
   }
 
-  body.page-pakan, body.page-pakan-minum .status-overview {
+  body.page-pakan .status-overview {
     padding: 1rem;
   }
 
-  body.page-pakan, body.page-pakan-minum .schedule-table {
+  body.page-pakan .schedule-table {
     min-width: 720px;
   }
 

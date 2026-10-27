@@ -105,7 +105,7 @@ $topbarSubtitle = 'Kelola jadwal pemberian pakan otomatis kandang dan tinjau log
   <link rel="stylesheet" href="../assets/css/topbar.css">
   <link rel="stylesheet" href="../assets/css/pakan.css">
 </head>
-<body class="dashboard-page page-pakan page-pakan-minum">
+<body class="dashboard-page page-pakan">
   <div class="dashboard-shell d-lg-flex">
     <?php include '../components/sidebar.php'; ?>
     <main class="main-content">

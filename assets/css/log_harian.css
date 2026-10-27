@@ -34,14 +34,14 @@ body.page-log-harian .log-status-toast.warning {
 }
 
 body.page-log-harian .log-status-toast.is-closing,
-body.page-pakan, body.page-pakan-minum .log-status-toast.is-closing,
+body.page-pakan .log-status-toast.is-closing,
 body.page-pencahayaan .log-status-toast.is-closing {
   opacity: 0;
   transform: translateY(-10px);
 }
 
 body.page-log-harian .log-status-icon,
-body.page-pakan, body.page-pakan-minum .log-status-icon,
+body.page-pakan .log-status-icon,
 body.page-pencahayaan .log-status-icon {
   width: 46px;
   height: 46px;
