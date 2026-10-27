@@ -605,7 +605,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
               </div>
 
               <div class="notification-list d-flex flex-column gap-3" id="notifListContainer">
-                <?php foreach ($notifs as $nt): ?>
+                <?php foreach (array_slice($notifs, 0, 4) as $nt): ?>
                   <div class="notif-item d-flex gap-2 align-items-start">
                     <span class="notif-dot <?= $nt['tipe'] === 'warning' ? 'bg-warning' : ($nt['tipe'] === 'danger' ? 'bg-danger' : 'bg-success') ?> mt-1 <?= empty($nt['is_read']) ? '' : 'bg-opacity-50' ?>"></span>
                     <div>
@@ -1369,3 +1369,4 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
   </script>
 </body>
 </html>
+

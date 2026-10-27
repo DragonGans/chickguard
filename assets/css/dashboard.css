@@ -660,6 +660,23 @@ body.dashboard-page {
 }
 
 /* Notifikasi Terbaru */
+.notification-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.notification-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
 .notif-item {
   padding: 0.3rem 0;
 }

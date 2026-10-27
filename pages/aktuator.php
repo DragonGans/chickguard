@@ -17,7 +17,7 @@ $activePage = 'aktuator';
 $username = $_SESSION['username'] ?? 'admin';
 
 $topbarTitle = 'Kontrol Aktuator IoT';
-$topbarSubtitle = 'Kontrol sakelar kipas, heater pemanas, pencahayaan, dan motor servo pakan secara real-time.';
+$topbarSubtitle = 'Kontrol sakelar kipas, pencahayaan, dan motor servo pakan secara real-time.';
 
 /* ----------------------------------------------------------------------------
  * Pengaturan / batas normal (pengaturan_kandang)
@@ -167,7 +167,6 @@ for ($slot = 0; $slot <= 48; $slot++) {
 $actQuery = mysqli_query($koneksi, "SELECT * FROM actuator_status WHERE id = 1 LIMIT 1");
 $actuators = $actQuery ? mysqli_fetch_assoc($actQuery) : [
     'kipas' => 0,
-    'heater' => 0,
     'lampu' => 0,
     'motor_pakan' => 1,
 ];
@@ -237,7 +236,7 @@ $unreadCount = (int) ($unreadRow['unread'] ?? count($notifs));
  * Log notifikasi khusus aktuator
  * -------------------------------------------------------------------------- */
 $actNotifs = [];
-$actNotifRes = mysqli_query($koneksi, "SELECT * FROM notifikasi WHERE pesan LIKE '%Kipas%' OR pesan LIKE '%Heater%' OR pesan LIKE '%Lampu%' OR pesan LIKE '%Motor%' OR pesan LIKE '%Aktuator%' ORDER BY id DESC LIMIT 8");
+$actNotifRes = mysqli_query($koneksi, "SELECT * FROM notifikasi WHERE pesan LIKE '%Kipas%' OR pesan LIKE '%Lampu%' OR pesan LIKE '%Motor%' OR pesan LIKE '%Aktuator%' ORDER BY id DESC LIMIT 8");
 if ($actNotifRes && mysqli_num_rows($actNotifRes) > 0) {
     while ($an = mysqli_fetch_assoc($actNotifRes)) {
         $actNotifs[] = $an;
@@ -246,8 +245,8 @@ if ($actNotifRes && mysqli_num_rows($actNotifRes) > 0) {
     $actNotifs = $notifs; // fallback
 }
 
-$countActive = (!empty($actuators['kipas']) ? 1 : 0) + (!empty($actuators['heater']) ? 1 : 0) + (!empty($actuators['lampu']) ? 1 : 0) + (!empty($actuators['motor_pakan']) ? 1 : 0);
-$estPower = (!empty($actuators['kipas']) ? 45 : 0) + (!empty($actuators['heater']) ? 150 : 0) + (!empty($actuators['lampu']) ? 25 : 0) + (!empty($actuators['motor_pakan']) ? 15 : 0);
+$countActive = (!empty($actuators['kipas']) ? 1 : 0) + (!empty($actuators['lampu']) ? 1 : 0) + (!empty($actuators['motor_pakan']) ? 1 : 0);
+$estPower = (!empty($actuators['kipas']) ? 45 : 0) + (!empty($actuators['lampu']) ? 25 : 0) + (!empty($actuators['motor_pakan']) ? 15 : 0);
 
 /* ----------------------------------------------------------------------------
  * Status kandang
@@ -308,10 +307,10 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         </div>
       </div>
 
-      <!-- 4 Interactive Big Actuator Cards Grid -->
+      <!-- 3 Interactive Big Actuator Cards Grid -->
       <div class="row g-3 g-xl-4 mb-4">
         <!-- 1. Kipas Ventilasi -->
-        <div class="col-12 col-md-6 col-xl-3">
+        <div class="col-12 col-md-4 col-xl-4">
           <div class="actuator-card-grid <?= !empty($actuators['kipas']) ? 'is-active' : '' ?>" id="card-kipas">
             <div class="actuator-card-header">
               <div class="actuator-big-icon icon-fan <?= !empty($actuators['kipas']) ? 'fan-running' : '' ?>" id="icon-kipas">
@@ -333,31 +332,8 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
           </div>
         </div>
 
-        <!-- 2. Pemanas Kandang (Heater) -->
-        <div class="col-12 col-md-6 col-xl-3">
-          <div class="actuator-card-grid <?= !empty($actuators['heater']) ? 'is-active' : '' ?>" id="card-heater">
-            <div class="actuator-card-header">
-              <div class="actuator-big-icon icon-heater" id="icon-heater">
-                <i class="fa-solid fa-temperature-arrow-up"></i>
-              </div>
-              <label class="switch-ios">
-                <input type="checkbox" class="js-actuator-toggle" data-actuator="heater" <?= !empty($actuators['heater']) ? 'checked' : '' ?>>
-                <span class="slider round"></span>
-              </label>
-            </div>
-
-            <div class="actuator-device-title">Heater Pemanas</div>
-
-            <div class="d-flex align-items-center gap-2 mt-auto pt-2">
-              <span class="badge <?= !empty($actuators['heater']) ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' ?> rounded-pill px-3 py-1 fw-bold" id="badge-heater">
-                <?= !empty($actuators['heater']) ? 'Menyala' : 'Mati' ?>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. Lampu Penerangan -->
-        <div class="col-12 col-md-6 col-xl-3">
+        <!-- 2. Lampu Penerangan -->
+        <div class="col-12 col-md-4 col-xl-4">
           <div class="actuator-card-grid <?= !empty($actuators['lampu']) ? 'is-active' : '' ?>" id="card-lampu">
             <div class="actuator-card-header">
               <div class="actuator-big-icon icon-lamp" id="icon-lampu">
@@ -379,8 +355,8 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
           </div>
         </div>
 
-        <!-- 4. Motor Pakan Otomatis -->
-        <div class="col-12 col-md-6 col-xl-3">
+        <!-- 3. Motor Pakan Otomatis -->
+        <div class="col-12 col-md-4 col-xl-4">
           <div class="actuator-card-grid <?= !empty($actuators['motor_pakan']) ? 'is-active' : '' ?>" id="card-motor_pakan">
             <div class="actuator-card-header">
               <div class="actuator-big-icon icon-feeder" id="icon-motor_pakan">
@@ -449,7 +425,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
                   </div>
                   <div>
                     <div class="fw-bold">Mode Cuaca Panas</div>
-                    <div class="text-muted small" style="font-size:0.75rem;">Kipas ON &bull; Heater OFF</div>
+                    <div class="text-muted small" style="font-size:0.75rem;">Kipas ON &bull; Sirkulasi Maksimal</div>
                   </div>
                 </button>
               </div>
@@ -470,7 +446,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
             <!-- Hardware Relay Diagnostics -->
             <div class="mt-auto pt-3 border-top">
               <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="fw-semibold small text-secondary">Status Modul Relay 4 Channel ESP32</span>
+                <span class="fw-semibold small text-secondary">Status Modul Relay ESP32</span>
                 <span class="text-muted small">Latensi: 42 ms</span>
               </div>
               <div class="d-flex gap-3 flex-wrap">
@@ -479,16 +455,12 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
                   <span>CH1: Kipas</span>
                 </div>
                 <div class="d-flex align-items-center gap-2 small">
-                  <span class="relay-indicator-dot <?= !empty($actuators['heater']) ? 'dot-on' : 'dot-off' ?>" id="dot-relay-2"></span>
-                  <span>CH2: Heater</span>
+                  <span class="relay-indicator-dot <?= !empty($actuators['lampu']) ? 'dot-on' : 'dot-off' ?>" id="dot-relay-2"></span>
+                  <span>CH2: Lampu</span>
                 </div>
                 <div class="d-flex align-items-center gap-2 small">
-                  <span class="relay-indicator-dot <?= !empty($actuators['lampu']) ? 'dot-on' : 'dot-off' ?>" id="dot-relay-3"></span>
-                  <span>CH3: Lampu</span>
-                </div>
-                <div class="d-flex align-items-center gap-2 small">
-                  <span class="relay-indicator-dot <?= !empty($actuators['motor_pakan']) ? 'dot-on' : 'dot-off' ?>" id="dot-relay-4"></span>
-                  <span>CH4: Motor</span>
+                  <span class="relay-indicator-dot <?= !empty($actuators['motor_pakan']) ? 'dot-on' : 'dot-off' ?>" id="dot-relay-3"></span>
+                  <span>CH3: Motor</span>
                 </div>
               </div>
             </div>
@@ -666,7 +638,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         const badge = document.getElementById("badge-" + actuator);
         const toggle = document.querySelector(`.js-actuator-toggle[data-actuator="${actuator}"]`);
         
-        const channelMap = { kipas: 1, heater: 2, lampu: 3, motor_pakan: 4 };
+        const channelMap = { kipas: 1, lampu: 2, motor_pakan: 3 };
         const dot = document.getElementById("dot-relay-" + channelMap[actuator]);
 
         if (toggle) toggle.checked = isChecked;
@@ -699,7 +671,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         const toggles = document.querySelectorAll(".js-actuator-toggle");
         let active = 0;
         let power = 0;
-        const wattMap = { kipas: 45, heater: 150, lampu: 25, motor_pakan: 15 };
+        const wattMap = { kipas: 45, lampu: 25, motor_pakan: 15 };
 
         toggles.forEach(t => {
           if (t.checked) {
@@ -798,13 +770,12 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         presetAuto.addEventListener("click", () => sendToggle("auto", 0));
       }
 
-      // 4. Mode Cuaca Panas (Kipas ON, Heater OFF)
+      // 4. Mode Cuaca Panas (Kipas ON)
       const btnHot = document.getElementById("presetHotWeather");
       if (btnHot) {
         btnHot.addEventListener("click", () => {
           sendToggle("kipas", 1);
-          sendToggle("heater", 0);
-          showToast("Mode Cuaca Panas diaktifkan: Kipas ON, Heater OFF.", "success");
+          showToast("Mode Cuaca Panas diaktifkan: Kipas Ventilasi ON.", "success");
         });
       }
 

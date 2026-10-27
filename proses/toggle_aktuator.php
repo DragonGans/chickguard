@@ -20,8 +20,8 @@ $value = isset($data['value']) ? (int) $data['value'] : null;
 // Batch toggle all
 if ($actuator === 'all') {
     $val = ($value === 1) ? 1 : 0;
-    $stmt = mysqli_prepare($koneksi, "UPDATE actuator_status SET kipas = ?, heater = ?, lampu = ?, motor_pakan = ? WHERE id = 1");
-    mysqli_stmt_bind_param($stmt, "iiii", $val, $val, $val, $val);
+    $stmt = mysqli_prepare($koneksi, "UPDATE actuator_status SET kipas = ?, heater = 0, lampu = ?, motor_pakan = ? WHERE id = 1");
+    mysqli_stmt_bind_param($stmt, "iii", $val, $val, $val);
     $executed = mysqli_stmt_execute($stmt);
 
     if ($executed) {
@@ -38,7 +38,7 @@ if ($actuator === 'all') {
             'message' => $actionMsg,
             'actuators' => [
                 'kipas' => $val,
-                'heater' => $val,
+                'heater' => 0,
                 'lampu' => $val,
                 'motor_pakan' => $val,
             ]
@@ -66,12 +66,12 @@ if ($actuator === 'auto') {
     $cahaya = $sensor ? (float)$sensor['cahaya'] : 1000;
 
     $kipas = ($suhu > (float)$settings['suhu_maks']) ? 1 : 0;
-    $heater = ($suhu < (float)$settings['suhu_min']) ? 1 : 0;
+    $heater = 0;
     $lampu = ($cahaya < (float)$settings['cahaya_min']) ? 1 : 0;
     $motor = 0;
 
-    $stmt = mysqli_prepare($koneksi, "UPDATE actuator_status SET kipas = ?, heater = ?, lampu = ?, motor_pakan = ? WHERE id = 1");
-    mysqli_stmt_bind_param($stmt, "iiii", $kipas, $heater, $lampu, $motor);
+    $stmt = mysqli_prepare($koneksi, "UPDATE actuator_status SET kipas = ?, heater = 0, lampu = ?, motor_pakan = ? WHERE id = 1");
+    mysqli_stmt_bind_param($stmt, "iii", $kipas, $lampu, $motor);
     $executed = mysqli_stmt_execute($stmt);
 
     if ($executed) {
