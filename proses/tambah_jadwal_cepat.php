@@ -10,7 +10,6 @@ if (!isset($_SESSION['login'])) {
 
 require_once '../config/koneksi.php';
 
-$jenis = trim($_POST['jenis'] ?? 'Pakan');
 $waktu = trim($_POST['waktu'] ?? '');
 $jumlah = (float) ($_POST['jumlah'] ?? 2.5);
 $hari = trim($_POST['hari'] ?? 'Semua Hari');
@@ -27,8 +26,8 @@ if (strlen($waktu) === 5) {
     $waktu .= ':00';
 }
 
-$stmt = mysqli_prepare($koneksi, "INSERT INTO jadwal_pakan_minum (jenis, waktu, jumlah, hari, catatan, is_active) VALUES (?, ?, ?, ?, ?, 1)");
-mysqli_stmt_bind_param($stmt, "ssdss", $jenis, $waktu, $jumlah, $hari, $catatan);
+$stmt = mysqli_prepare($koneksi, "INSERT INTO jadwal_pakan (waktu, jumlah, hari, catatan, is_active) VALUES (?, ?, ?, ?, 1)");
+mysqli_stmt_bind_param($stmt, "sdss", $waktu, $jumlah, $hari, $catatan);
 $success = mysqli_stmt_execute($stmt);
 
 if ($success) {

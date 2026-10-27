@@ -197,7 +197,7 @@ $actuators = $actQuery ? mysqli_fetch_assoc($actQuery) : [
 /* ----------------------------------------------------------------------------
  * Jadwal pakan widget (maks 2 jadwal aktif)
  * -------------------------------------------------------------------------- */
-$jadwalQuery = mysqli_query($koneksi, "SELECT * FROM jadwal_pakan_minum WHERE jenis = 'Pakan' ORDER BY waktu ASC LIMIT 2");
+$jadwalQuery = mysqli_query($koneksi, "SELECT * FROM jadwal_pakan ORDER BY waktu ASC LIMIT 2");
 $feedSchedules = [];
 if ($jadwalQuery) {
     while ($row = mysqli_fetch_assoc($jadwalQuery)) {
@@ -511,7 +511,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
                     <i class="fa-solid fa-calendar-check text-secondary"></i>
                     <span>Jadwal Pakan</span>
                   </div>
-                  <a href="pakan_minum.php" class="panel-link">Lihat Semua</a>
+                  <a href="pakan.php" class="panel-link">Lihat Semua</a>
                 </div>
 
                 <div class="schedule-list mt-3 d-flex flex-column gap-3" id="scheduleListContainer">

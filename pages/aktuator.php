@@ -174,7 +174,7 @@ $actuators = $actQuery ? mysqli_fetch_assoc($actQuery) : [
 /* ----------------------------------------------------------------------------
  * Jadwal pakan widget (maks 2 jadwal aktif)
  * -------------------------------------------------------------------------- */
-$jadwalQuery = mysqli_query($koneksi, "SELECT * FROM jadwal_pakan_minum WHERE jenis = 'Pakan' ORDER BY waktu ASC LIMIT 2");
+$jadwalQuery = mysqli_query($koneksi, "SELECT * FROM jadwal_pakan ORDER BY waktu ASC LIMIT 2");
 $feedSchedules = [];
 if ($jadwalQuery) {
     while ($row = mysqli_fetch_assoc($jadwalQuery)) {

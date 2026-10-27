@@ -12,7 +12,7 @@ chickguard_init_tables($koneksi);
 
 $limit = 6;
 $page = max(1, (int) ($_GET['page'] ?? 1));
-$countResult = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM jadwal_pakan_minum WHERE jenis = 'Pakan'");
+$countResult = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM jadwal_pakan");
 $totalData = (int) (mysqli_fetch_assoc($countResult)['total'] ?? 0);
 $totalPages = max(1, (int) ceil($totalData / $limit));
 if ($page > $totalPages) {
@@ -20,7 +20,7 @@ if ($page > $totalPages) {
 }
 $offset = ($page - 1) * $limit;
 
-$stmt = mysqli_prepare($koneksi, "SELECT * FROM jadwal_pakan_minum WHERE jenis = 'Pakan' ORDER BY waktu ASC, id ASC LIMIT ? OFFSET ?");
+$stmt = mysqli_prepare($koneksi, "SELECT * FROM jadwal_pakan ORDER BY waktu ASC, id ASC LIMIT ? OFFSET ?");
 mysqli_stmt_bind_param($stmt, "ii", $limit, $offset);
 mysqli_stmt_execute($stmt);
 $query = mysqli_stmt_get_result($stmt);
@@ -83,7 +83,7 @@ $statusMessages = [
     ],
 ];
 
-$activePage = 'pakan_minum';
+$activePage = 'pakan';
 $topbarTitle = 'Jadwal Pakan';
 $topbarSubtitle = 'Kelola jadwal pemberian pakan otomatis kandang dan tinjau log riwayat pakan.';
 ?>
@@ -103,9 +103,9 @@ $topbarSubtitle = 'Kelola jadwal pemberian pakan otomatis kandang dan tinjau log
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/sidebar.css">
   <link rel="stylesheet" href="../assets/css/topbar.css">
-  <link rel="stylesheet" href="../assets/css/pakan_minum.css">
+  <link rel="stylesheet" href="../assets/css/pakan.css">
 </head>
-<body class="dashboard-page page-pakan-minum">
+<body class="dashboard-page page-pakan page-pakan-minum">
   <div class="dashboard-shell d-lg-flex">
     <?php include '../components/sidebar.php'; ?>
     <main class="main-content">
@@ -132,7 +132,7 @@ $topbarSubtitle = 'Kelola jadwal pemberian pakan otomatis kandang dan tinjau log
               </div>
             </div>
 
-            <form method="post" action="../proses/proses_pakan_minum.php" id="bulkDeleteForm">
+            <form method="post" action="../proses/proses_pakan.php" id="bulkDeleteForm">
               <input type="hidden" name="action" value="delete_selected">
 
               <div class="table-wrap">
@@ -207,9 +207,9 @@ $topbarSubtitle = 'Kelola jadwal pemberian pakan otomatis kandang dan tinjau log
                                  title="Edit Jadwal">
                                 <i class="bi bi-pencil-square"></i>
                               </button>
-                              <a href="../proses/proses_pakan_minum.php?action=delete&id=<?= e($item['id']) ?>" 
+                              <a href="../proses/proses_pakan.php?action=delete&id=<?= e($item['id']) ?>" 
                                  class="btn btn-sm btn-light text-danger border rounded-circle js-open-delete-modal" style="width:34px;height:34px;display:grid;place-items:center;"
-                                 data-delete-href="../proses/proses_pakan_minum.php?action=delete&id=<?= e($item['id']) ?>"
+                                 data-delete-href="../proses/proses_pakan.php?action=delete&id=<?= e($item['id']) ?>"
                                  title="Hapus Jadwal">
                                 <i class="bi bi-trash3"></i>
                               </a>
@@ -356,10 +356,10 @@ $topbarSubtitle = 'Kelola jadwal pemberian pakan otomatis kandang dan tinjau log
           </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form method="post" action="../proses/proses_pakan_minum.php" id="formSchedule">
+        <form method="post" action="../proses/proses_pakan.php" id="formSchedule">
           <input type="hidden" name="action" id="formAction" value="create">
           <input type="hidden" name="id" id="scheduleId">
-          <input type="hidden" name="jenis" value="Pakan">
+          
           
           <div class="modal-body px-4 py-3">
             <!-- Waktu Pemberian -->

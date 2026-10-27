@@ -22,7 +22,7 @@ if ($id <= 0) {
     exit;
 }
 
-$stmt = mysqli_prepare($koneksi, "UPDATE jadwal_pakan_minum SET is_active = ? WHERE id = ?");
+$stmt = mysqli_prepare($koneksi, "UPDATE jadwal_pakan SET is_active = ? WHERE id = ?");
 mysqli_stmt_bind_param($stmt, "ii", $status, $id);
 $success = mysqli_stmt_execute($stmt);
 

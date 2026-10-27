@@ -15,8 +15,8 @@ $menuItems = [
         'label' => 'Kontrol Aktuator',
     ],
     [
-        'key' => 'pakan_minum',
-        'href' => 'pakan_minum.php',
+        'key' => 'pakan',
+        'href' => 'pakan.php',
         'icon' => '<i class="fa-solid fa-calendar-check"></i>',
         'label' => 'Jadwal Pakan',
     ],

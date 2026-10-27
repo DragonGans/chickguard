@@ -12,28 +12,22 @@ function chickguard_init_tables(mysqli $koneksi): void
         used_at DATETIME DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         INDEX (user_id),
-        INDEX (token)
+        INDEX (token),
+        CONSTRAINT fk_password_resets_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
     )");
 
-    mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS jadwal_pakan_minum (
+    mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS jadwal_pakan (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        jenis ENUM('Pakan','Minum') NOT NULL,
         waktu TIME NOT NULL,
-        jumlah DECIMAL(8,2) NOT NULL,
-        hari VARCHAR(120) NOT NULL,
+        jumlah DECIMAL(8,2) NOT NULL DEFAULT 2.50,
+        hari VARCHAR(120) NOT NULL DEFAULT 'Semua Hari',
         catatan VARCHAR(255) DEFAULT NULL,
+        is_active TINYINT(1) NOT NULL DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
 
-    mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS jadwal_pencahayaan (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        jenis VARCHAR(50) NOT NULL,
-        waktu TIME NOT NULL,
-        durasi DECIMAL(8,2) NOT NULL,
-        hari VARCHAR(120) NOT NULL,
-        catatan VARCHAR(255) DEFAULT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )");
+    mysqli_query($koneksi, "DROP TABLE IF EXISTS jadwal_pakan_minum");
+    mysqli_query($koneksi, "DROP TABLE IF EXISTS jadwal_pencahayaan");
 
     mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS log_harian (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -100,8 +94,7 @@ function chickguard_init_tables(mysqli $koneksi): void
     seed_log_pemberian_pakan($koneksi);
     seed_notifikasi($koneksi);
     seed_pengaturan_kandang($koneksi);
-    seed_jadwal_pakan_minum($koneksi);
-    seed_jadwal_pencahayaan($koneksi);
+    seed_jadwal_pakan($koneksi);
     seed_log_harian($koneksi);
     sinkronkan_data_log_harian($koneksi);
     tambah_log_harian_otomatis($koneksi);
@@ -119,9 +112,15 @@ function ensure_log_harian_extra_columns(mysqli $koneksi): void
         mysqli_query($koneksi, "ALTER TABLE log_harian ADD level_air DECIMAL(5,2) DEFAULT 72 AFTER cahaya");
     }
 
-    $check = mysqli_query($koneksi, "SHOW COLUMNS FROM jadwal_pakan_minum LIKE 'is_active'");
-    if ($check && mysqli_num_rows($check) === 0) {
-        mysqli_query($koneksi, "ALTER TABLE jadwal_pakan_minum ADD is_active TINYINT(1) DEFAULT 1 AFTER catatan");
+
+
+    $checkGarbage = mysqli_query($koneksi, "SHOW COLUMNS FROM log_harian LIKE 'Kolom 11'");
+    if ($checkGarbage && mysqli_num_rows($checkGarbage) > 0) {
+        mysqli_query($koneksi, "ALTER TABLE log_harian DROP COLUMN `Kolom 11`");
+    }
+    $checkChecked = mysqli_query($koneksi, "SHOW COLUMNS FROM log_harian LIKE 'is_checked'");
+    if ($checkChecked && mysqli_num_rows($checkChecked) > 0) {
+        mysqli_query($koneksi, "ALTER TABLE log_harian DROP COLUMN is_checked");
     }
 }
 
@@ -202,48 +201,24 @@ function ensure_users_nama_lengkap_column(mysqli $koneksi): void
     }
 }
 
-function seed_jadwal_pakan_minum(mysqli $koneksi): void
+function seed_jadwal_pakan(mysqli $koneksi): void
 {
-    $result = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM jadwal_pakan_minum");
+    $result = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM jadwal_pakan");
     $row = mysqli_fetch_assoc($result);
     if ((int) ($row['total'] ?? 0) > 0) {
         return;
     }
 
     $data = [
-        ['Pakan', '06:00:00', 3.0, 'Semua Hari', 'Pakan Pagi Rutin'],
-        ['Pakan', '12:00:00', 2.0, 'Semua Hari', 'Pakan Siang Tambahan'],
-        ['Pakan', '16:00:00', 2.5, 'Semua Hari', 'Pakan Sore Rutin'],
+        ['06:00:00', 3.0, 'Semua Hari', 'Pakan Pagi Rutin'],
+        ['12:00:00', 2.0, 'Semua Hari', 'Pakan Siang Tambahan'],
+        ['16:00:00', 2.5, 'Semua Hari', 'Pakan Sore Rutin'],
     ];
 
-    $stmt = mysqli_prepare($koneksi, "INSERT INTO jadwal_pakan_minum (jenis, waktu, jumlah, hari, catatan) VALUES (?, ?, ?, ?, ?)");
+    $stmt = mysqli_prepare($koneksi, "INSERT INTO jadwal_pakan (waktu, jumlah, hari, catatan, is_active) VALUES (?, ?, ?, ?, 1)");
     foreach ($data as $item) {
-        [$jenis, $waktu, $jumlah, $hari, $catatan] = $item;
-        mysqli_stmt_bind_param($stmt, "ssdss", $jenis, $waktu, $jumlah, $hari, $catatan);
-        mysqli_stmt_execute($stmt);
-    }
-}
-
-function seed_jadwal_pencahayaan(mysqli $koneksi): void
-{
-    $result = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM jadwal_pencahayaan");
-    $row = mysqli_fetch_assoc($result);
-    if ((int) ($row['total'] ?? 0) > 0) {
-        return;
-    }
-
-    $data = [
-        ['Lampu Utama', '06:00:00', 3.0, 'Senin, Rabu, Jumat', 'Pencahayaan pagi untuk awal aktivitas kandang'],
-        ['Lampu Pemanas', '07:00:00', 2.0, 'Semua Hari', 'Menjaga suhu kandang tetap hangat di pagi hari'],
-        ['Lampu Utama', '12:00:00', 2.0, 'Semua Hari', 'Pencahayaan siang untuk menjaga visibilitas area'],
-        ['Lampu Cadangan', '13:00:00', 1.5, 'Selasa, Kamis', 'Lampu tambahan saat cuaca redup atau mendung'],
-        ['Lampu Utama', '19:00:00', 2.8, 'Sabtu, Minggu', 'Pencahayaan malam untuk akhir pekan'],
-    ];
-
-    $stmt = mysqli_prepare($koneksi, "INSERT INTO jadwal_pencahayaan (jenis, waktu, durasi, hari, catatan) VALUES (?, ?, ?, ?, ?)");
-    foreach ($data as $item) {
-        [$jenis, $waktu, $durasi, $hari, $catatan] = $item;
-        mysqli_stmt_bind_param($stmt, "ssdss", $jenis, $waktu, $durasi, $hari, $catatan);
+        [$waktu, $jumlah, $hari, $catatan] = $item;
+        mysqli_stmt_bind_param($stmt, "sdss", $waktu, $jumlah, $hari, $catatan);
         mysqli_stmt_execute($stmt);
     }
 }
@@ -319,18 +294,15 @@ function jadwal_berlaku_pada_hari(string $jadwalHari, string $hari): bool
 
 function ringkasan_pakan_minum_harian(mysqli $koneksi, string $hari): array
 {
-    $result = mysqli_query($koneksi, "SELECT jenis, jumlah, hari FROM jadwal_pakan_minum");
+    $result = mysqli_query($koneksi, "SELECT jumlah, hari FROM jadwal_pakan WHERE is_active = 1");
     $ringkasan = ['pakan' => 0.0, 'minum' => 0.0];
 
-    while ($row = mysqli_fetch_assoc($result)) {
-        if (!jadwal_berlaku_pada_hari((string) $row['hari'], $hari)) {
-            continue;
-        }
-
-        if ($row['jenis'] === 'Pakan') {
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            if (!jadwal_berlaku_pada_hari((string) $row['hari'], $hari)) {
+                continue;
+            }
             $ringkasan['pakan'] += (float) $row['jumlah'];
-        } elseif ($row['jenis'] === 'Minum') {
-            $ringkasan['minum'] += (float) $row['jumlah'];
         }
     }
 
@@ -339,13 +311,6 @@ function ringkasan_pakan_minum_harian(mysqli $koneksi, string $hari): array
 
 function status_lampu_harian(mysqli $koneksi, string $hari): string
 {
-    $result = mysqli_query($koneksi, "SELECT hari FROM jadwal_pencahayaan");
-    while ($row = mysqli_fetch_assoc($result)) {
-        if (jadwal_berlaku_pada_hari((string) $row['hari'], $hari)) {
-            return 'Hidup';
-        }
-    }
-
     return 'Mati';
 }
 
