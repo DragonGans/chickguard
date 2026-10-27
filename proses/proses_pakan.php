@@ -53,11 +53,18 @@ if ($action === 'delete_selected') {
 }
 
 $id = (int) ($_POST['id'] ?? 0);
-$waktu = $_POST['waktu'] ?? '';
-$jumlah = (float) ($_POST['jumlah'] ?? 0);
+$waktu = trim($_POST['waktu'] ?? '');
+$jumlah = (float) ($_POST['jumlah'] ?? 2.5);
+if ($jumlah <= 0) {
+    $jumlah = 2.5;
+}
 $catatan = trim($_POST['catatan'] ?? '');
 $hariInput = $_POST['hari'] ?? [];
-$hari = in_array('Semua Hari', $hariInput, true) ? 'Semua Hari' : implode(', ', $hariInput);
+if (is_array($hariInput)) {
+    $hari = in_array('Semua Hari', $hariInput, true) ? 'Semua Hari' : implode(', ', $hariInput);
+} else {
+    $hari = trim((string) $hariInput);
+}
 
 if ($waktu === '' || $hari === '') {
     redirect_pakan('invalid');
@@ -74,6 +81,11 @@ if ($catatan === '') {
     }
 }
 
+// Ensure HH:MM:SS
+if (strlen($waktu) === 5) {
+    $waktu .= ':00';
+}
+
 if ($action === 'update' && $id > 0) {
     $stmt = mysqli_prepare($koneksi, "UPDATE jadwal_pakan SET waktu=?, jumlah=?, hari=?, catatan=? WHERE id=?");
     mysqli_stmt_bind_param($stmt, "sdssi", $waktu, $jumlah, $hari, $catatan, $id);
@@ -85,4 +97,3 @@ $stmt = mysqli_prepare($koneksi, "INSERT INTO jadwal_pakan (waktu, jumlah, hari,
 mysqli_stmt_bind_param($stmt, "sdss", $waktu, $jumlah, $hari, $catatan);
 mysqli_stmt_execute($stmt);
 redirect_pakan('created');
-?>

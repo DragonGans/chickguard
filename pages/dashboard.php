@@ -197,18 +197,12 @@ $actuators = $actQuery ? mysqli_fetch_assoc($actQuery) : [
 /* ----------------------------------------------------------------------------
  * Jadwal pakan widget (maks 2 jadwal aktif)
  * -------------------------------------------------------------------------- */
-$jadwalQuery = mysqli_query($koneksi, "SELECT * FROM jadwal_pakan ORDER BY waktu ASC LIMIT 2");
+$jadwalQuery = mysqli_query($koneksi, "SELECT * FROM jadwal_pakan ORDER BY waktu ASC");
 $feedSchedules = [];
 if ($jadwalQuery) {
     while ($row = mysqli_fetch_assoc($jadwalQuery)) {
         $feedSchedules[] = $row;
     }
-}
-if (empty($feedSchedules)) {
-    $feedSchedules = [
-        ['id' => 1, 'catatan' => 'Pakan 1', 'waktu' => '06:00:00', 'is_active' => 1],
-        ['id' => 2, 'catatan' => 'Pakan 2', 'waktu' => '16:00:00', 'is_active' => 1],
-    ];
 }
 
 /* ----------------------------------------------------------------------------
@@ -515,28 +509,35 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
                 </div>
 
                 <div class="schedule-list mt-3 d-flex flex-column gap-3" id="scheduleListContainer">
-                  <?php foreach ($feedSchedules as $index => $sch): ?>
-                    <?php
-                      $catatan = trim((string) ($sch['catatan'] ?? ''));
-                      $pakanLabel = ($catatan !== '' && mb_strlen($catatan) <= 14) ? $catatan : ('Pakan ' . ($index + 1));
-                      $pakanTime = substr($sch['waktu'], 0, 5);
-                      $isActive = !isset($sch['is_active']) || $sch['is_active'] == 1;
-                    ?>
-                    <div class="schedule-row d-flex align-items-center justify-content-between" data-schedule-id="<?= (int) $sch['id'] ?>">
-                      <div>
-                        <div class="schedule-label"><?= htmlspecialchars($pakanLabel, ENT_QUOTES, 'UTF-8') ?></div>
-                        <div class="schedule-time"><?= htmlspecialchars($pakanTime, ENT_QUOTES, 'UTF-8') ?></div>
+                    <?php if (empty($feedSchedules)): ?>
+                      <div class="text-center text-muted py-3 small" id="noScheduleNotice">
+                        <i class="bi bi-calendar-x d-block fs-3 text-secondary mb-1"></i>
+                        Belum ada jadwal pakan
                       </div>
-                      <label class="switch-ios">
-                        <input type="checkbox" class="js-toggle-feed-schedule" data-id="<?= (int) $sch['id'] ?>" <?= $isActive ? 'checked' : '' ?>>
-                        <span class="slider round"></span>
-                      </label>
-                    </div>
-                  <?php endforeach; ?>
+                    <?php else: ?>
+                      <?php foreach ($feedSchedules as $index => $sch): ?>
+                        <?php
+                          $catatan = trim((string) ($sch['catatan'] ?? ''));
+                          $pakanLabel = $catatan !== '' ? $catatan : ('Pakan ' . ($index + 1));
+                          $pakanTime = date('H:i', strtotime($sch['waktu']));
+                          $isActive = !isset($sch['is_active']) || $sch['is_active'] == 1;
+                        ?>
+                        <div class="schedule-row d-flex align-items-center justify-content-between" data-schedule-id="<?= (int) $sch['id'] ?>">
+                          <div>
+                            <div class="schedule-label"><?= htmlspecialchars($pakanLabel, ENT_QUOTES, 'UTF-8') ?></div>
+                            <div class="schedule-time"><?= htmlspecialchars($pakanTime, ENT_QUOTES, 'UTF-8') ?> WIB</div>
+                          </div>
+                          <label class="switch-ios">
+                            <input type="checkbox" class="js-toggle-feed-schedule" data-id="<?= (int) $sch['id'] ?>" <?= $isActive ? 'checked' : '' ?>>
+                            <span class="slider round"></span>
+                          </label>
+                        </div>
+                      <?php endforeach; ?>
+                    <?php endif; ?>
+                  </div>
                 </div>
-              </div>
 
-              <button type="button" class="btn-atur-jadwal mt-3 w-100 js-open-schedule-modal">
+                <button type="button" class="btn-atur-jadwal mt-3 w-100 js-open-schedule-modal">
                 <i class="bi bi-calendar-check"></i> Atur Jadwal
               </button>
             </div>
@@ -612,43 +613,73 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
   <!-- Modal: Atur Jadwal Pakan -->
   <div class="modal fade" id="modalAturJadwal" tabindex="-1" aria-labelledby="modalAturJadwalTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-        <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold" id="modalAturJadwalTitle">
-            <i class="bi bi-calendar-plus text-primary me-2"></i>Atur Jadwal Pakan
-          </h5>
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
+        <div class="modal-header border-0 pb-0 pt-4 px-4 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width: 48px; height: 48px; border-radius: 14px; background: #e6f9f0; color: #0d9488; display: grid; place-items: center; font-size: 1.35rem;">
+              <i class="fa-solid fa-bowl-food"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold text-dark mb-0" id="modalAturJadwalTitle">Tambah Jadwal Pakan</h5>
+              <small class="text-muted" id="modalAturJadwalSubtitle">Atur waktu dan hari operasional pakan otomatis</small>
+            </div>
+          </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <form id="formAturJadwal">
-          <div class="modal-body">
+          <div class="modal-body px-4 py-3">
+            <!-- 1. Nama Jadwal -->
             <div class="mb-3">
-              <label for="inputWaktuJadwal" class="form-label fw-semibold text-secondary">Waktu Pemberian</label>
-              <input type="time" class="form-control form-control-lg rounded-3" id="inputWaktuJadwal" name="waktu" required value="08:00">
+              <label for="dashCatatan" class="form-label fw-bold text-dark small d-flex align-items-center gap-1.5 mb-2">
+                <i class="bi bi-tag-fill text-success"></i> Nama Jadwal
+              </label>
+              <input type="text" name="catatan" id="dashCatatan" class="form-control form-control-lg rounded-3 fw-medium text-dark" placeholder="Contoh: Pakan Pagi" required style="border: 1.5px solid #cbd5e1; font-size: 1.05rem; padding: 0.6rem 1rem;">
             </div>
+
+            <!-- 2. Waktu Pemberian (WIB) -->
             <div class="mb-3">
-              <label for="inputLabelJadwal" class="form-label fw-semibold text-secondary">Nama / Catatan Sesi</label>
-              <input type="text" class="form-control rounded-3" id="inputLabelJadwal" name="catatan" placeholder="Contoh: Pakan Tambahan Siang" value="Pakan Tambahan">
-            </div>
-            <div class="row">
-              <div class="col-6 mb-3">
-                <label for="inputJumlahJadwal" class="form-label fw-semibold text-secondary">Porsi (kg)</label>
-                <input type="number" step="0.1" class="form-control rounded-3" id="inputJumlahJadwal" name="jumlah" value="2.5">
+              <label for="dashWaktu" class="form-label fw-bold text-dark small d-flex align-items-center gap-1.5 mb-2">
+                <i class="bi bi-clock-fill text-success"></i> Waktu Pemberian (WIB)
+              </label>
+              <div class="input-group">
+                <input type="time" name="waktu" id="dashWaktu" class="form-control form-control-lg rounded-3 fw-bold text-dark" value="08:00" required style="border: 1.5px solid #cbd5e1; font-size: 1.35rem; letter-spacing: 1px; padding: 0.6rem 1rem;">
               </div>
-              <div class="col-6 mb-3">
-                <label for="inputHariJadwal" class="form-label fw-semibold text-secondary">Hari</label>
-                <select class="form-select rounded-3" id="inputHariJadwal" name="hari">
-                  <option value="Semua Hari" selected>Semua Hari</option>
-                  <option value="Senin, Rabu, Jumat">Senin, Rabu, Jumat</option>
-                  <option value="Selasa, Kamis">Selasa, Kamis</option>
-                  <option value="Sabtu, Minggu">Sabtu, Minggu</option>
-                </select>
+            </div>
+
+            <!-- 3. Pilih Hari Aktif -->
+            <div class="mb-2">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label fw-bold text-dark small d-flex align-items-center gap-1.5 mb-0">
+                  <i class="bi bi-calendar-week-fill text-success"></i> Pilih Hari Aktif
+                </label>
+                <button type="button" class="btn btn-sm btn-link text-decoration-none text-muted p-0 small" id="dashResetDaysBtn" style="font-size: 0.8rem;">
+                  <i class="bi bi-arrow-repeat me-1"></i>Pilih Ulang
+                </button>
+              </div>
+
+              <div class="schedule-days-container p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                <div class="mb-3">
+                  <label class="form-check d-flex align-items-center gap-2 m-0" style="cursor: pointer;">
+                    <input class="form-check-input mt-0" type="checkbox" name="hari[]" value="Semua Hari" id="dashAllDays" checked style="width: 1.15rem; height: 1.15rem;">
+                    <span class="form-check-label fw-bold text-dark small">Pilih Semua Hari (Setiap Hari)</span>
+                  </label>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-2 pt-1" id="dashDayButtonsContainer">
+                  <?php foreach (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $day): ?>
+                    <label class="day-chip-item m-0">
+                      <input type="checkbox" name="hari[]" value="<?= htmlspecialchars($day, ENT_QUOTES, 'UTF-8') ?>" class="dash-day-checkbox visually-hidden" checked>
+                      <span class="day-chip-badge"><?= htmlspecialchars($day, ENT_QUOTES, 'UTF-8') ?></span>
+                    </label>
+                  <?php endforeach; ?>
+                </div>
               </div>
             </div>
           </div>
-          <div class="modal-footer border-0 pt-0">
-            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
-            <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold" id="btnSimpanJadwal">
-              <i class="bi bi-check2 me-1"></i> Simpan Jadwal
+          <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-light rounded-pill px-4 fw-semibold text-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2" id="btnSimpanJadwal">
+              <i class="bi bi-check2"></i>
+              <span>Simpan Jadwal</span>
             </button>
           </div>
         </form>
@@ -1246,11 +1277,49 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         });
       });
 
-      // Modal: Atur Jadwal Open
+      // Modal: Atur Jadwal Open & Controls
       const modalJadwalEl = document.getElementById("modalAturJadwal");
       const modalJadwal = modalJadwalEl ? new bootstrap.Modal(modalJadwalEl) : null;
+      const dashCatatan = document.getElementById("dashCatatan");
+      const dashWaktu = document.getElementById("dashWaktu");
+      const dashAllDays = document.getElementById("dashAllDays");
+      const dashDayCheckboxes = document.querySelectorAll(".dash-day-checkbox");
+      const dashResetDaysBtn = document.getElementById("dashResetDaysBtn");
+
+      function clearDashScheduleForm() {
+        if (dashCatatan) dashCatatan.value = "";
+        if (dashWaktu) dashWaktu.value = "08:00";
+        if (dashAllDays) dashAllDays.checked = true;
+        dashDayCheckboxes.forEach((cb) => (cb.checked = true));
+      }
+
+      if (dashAllDays) {
+        dashAllDays.addEventListener("change", () => {
+          dashDayCheckboxes.forEach((cb) => {
+            cb.checked = dashAllDays.checked;
+          });
+        });
+      }
+
+      dashDayCheckboxes.forEach((cb) => {
+        cb.addEventListener("change", () => {
+          const allChecked = Array.from(dashDayCheckboxes).every((item) => item.checked);
+          if (dashAllDays) {
+            dashAllDays.checked = allChecked;
+          }
+        });
+      });
+
+      if (dashResetDaysBtn) {
+        dashResetDaysBtn.addEventListener("click", () => {
+          if (dashAllDays) dashAllDays.checked = true;
+          dashDayCheckboxes.forEach((cb) => (cb.checked = true));
+        });
+      }
+
       document.querySelectorAll(".js-open-schedule-modal").forEach(btn => {
         btn.addEventListener("click", () => {
+          clearDashScheduleForm();
           if (modalJadwal) modalJadwal.show();
         });
       });
@@ -1261,6 +1330,9 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         formAturJadwal.addEventListener("submit", async (e) => {
           e.preventDefault();
           const formData = new FormData(formAturJadwal);
+          const submitBtn = document.getElementById("btnSimpanJadwal");
+          if (submitBtn) submitBtn.disabled = true;
+
           try {
             const res = await fetch("../proses/tambah_jadwal_cepat.php", {
               method: "POST",
@@ -1272,12 +1344,16 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
               showToast("Jadwal pakan berhasil ditambahkan!", "success");
               const container = document.getElementById("scheduleListContainer");
               if (container) {
+                const noNotice = document.getElementById("noScheduleNotice");
+                if (noNotice) noNotice.remove();
+
                 const newRow = document.createElement("div");
                 newRow.className = "schedule-row d-flex align-items-center justify-content-between";
+                newRow.setAttribute("data-schedule-id", data.id);
                 newRow.innerHTML = `
                   <div>
-                    <div class="schedule-label">${escapeHtml(formData.get("catatan") || "Pakan")}</div>
-                    <div class="schedule-time">${data.waktu}</div>
+                    <div class="schedule-label">${escapeHtml(data.catatan || formData.get("catatan") || "Pakan")}</div>
+                    <div class="schedule-time">${data.waktu} WIB</div>
                   </div>
                   <label class="switch-ios">
                     <input type="checkbox" class="js-toggle-feed-schedule" data-id="${data.id}" checked>
@@ -1300,6 +1376,8 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
           } catch (err) {
             console.error(err);
             showToast("Terjadi kendala saat mengirim jadwal.", "warning");
+          } finally {
+            if (submitBtn) submitBtn.disabled = false;
           }
         });
       }

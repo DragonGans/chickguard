@@ -202,6 +202,7 @@ $topbarSubtitle = 'Kelola jadwal pemberian pakan otomatis kandang dan tinjau log
                             <div class="action-icons justify-content-center d-flex align-items-center gap-2">
                               <button type="button" class="btn btn-sm btn-light text-primary border rounded-circle js-edit-schedule" style="width:34px;height:34px;display:grid;place-items:center;"
                                  data-id="<?= e($item['id']) ?>"
+                                  data-catatan="<?= e($sesiLabel) ?>"
                                  data-waktu="<?= e(date('H:i', strtotime($item['waktu']))) ?>"
                                  data-hari="<?= e($item['hari']) ?>"
                                  title="Edit Jadwal">
@@ -362,6 +363,14 @@ $topbarSubtitle = 'Kelola jadwal pemberian pakan otomatis kandang dan tinjau log
           
           
           <div class="modal-body px-4 py-3">
+            <!-- Nama Jadwal -->
+            <div class="mb-3">
+              <label for="scheduleCatatan" class="form-label fw-bold text-dark small d-flex align-items-center gap-1.5 mb-2">
+                <i class="bi bi-tag-fill text-success"></i> Nama Jadwal
+              </label>
+              <input type="text" name="catatan" id="scheduleCatatan" class="form-control form-control-lg rounded-3 fw-medium text-dark" placeholder="Contoh: Pakan Pagi" required style="border: 1.5px solid #cbd5e1; font-size: 1.05rem; padding: 0.6rem 1rem;">
+            </div>
+
             <!-- Waktu Pemberian -->
             <div class="mb-4">
               <label for="scheduleWaktu" class="form-label fw-bold text-dark small d-flex align-items-center gap-1.5 mb-2">
@@ -441,6 +450,7 @@ $topbarSubtitle = 'Kelola jadwal pemberian pakan otomatis kandang dan tinjau log
 
       const formAction = document.getElementById("formAction");
       const scheduleId = document.getElementById("scheduleId");
+      const scheduleCatatan = document.getElementById("scheduleCatatan");
       const scheduleWaktu = document.getElementById("scheduleWaktu");
       const scheduleModalTitle = document.getElementById("scheduleModalTitle");
       const scheduleModalSubtitle = document.getElementById("scheduleModalSubtitle");
@@ -482,6 +492,7 @@ $topbarSubtitle = 'Kelola jadwal pemberian pakan otomatis kandang dan tinjau log
       function clearForm() {
         formAction.value = "create";
         scheduleId.value = "";
+        if (scheduleCatatan) scheduleCatatan.value = "";
         scheduleWaktu.value = "08:00";
         scheduleModalTitle.textContent = "Tambah Jadwal Pakan";
         if (scheduleModalSubtitle) scheduleModalSubtitle.textContent = "Atur waktu dan hari operasional pakan otomatis";
@@ -528,6 +539,7 @@ $topbarSubtitle = 'Kelola jadwal pemberian pakan otomatis kandang dan tinjau log
         button.addEventListener("click", () => {
           formAction.value = "update";
           scheduleId.value = button.dataset.id;
+          if (scheduleCatatan) scheduleCatatan.value = button.dataset.catatan || "";
           scheduleWaktu.value = button.dataset.waktu;
           scheduleModalTitle.textContent = "Edit Jadwal Pakan";
           if (scheduleModalSubtitle) scheduleModalSubtitle.textContent = "Ubah waktu dan hari jadwal pakan";

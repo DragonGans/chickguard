@@ -509,6 +509,24 @@ body.dashboard-page {
 }
 
 /* Schedule Panel */
+.schedule-list {
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.schedule-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.schedule-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.schedule-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
 .schedule-label {
   font-size: 0.88rem;
   font-weight: 700;

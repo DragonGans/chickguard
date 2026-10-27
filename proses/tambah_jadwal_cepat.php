@@ -11,14 +11,37 @@ if (!isset($_SESSION['login'])) {
 require_once '../config/koneksi.php';
 
 $waktu = trim($_POST['waktu'] ?? '');
+$catatan = trim($_POST['catatan'] ?? '');
 $jumlah = (float) ($_POST['jumlah'] ?? 2.5);
-$hari = trim($_POST['hari'] ?? 'Semua Hari');
-$catatan = trim($_POST['catatan'] ?? 'Pemberian pakan terjadwal');
+if ($jumlah <= 0) {
+    $jumlah = 2.5;
+}
+
+$hariInput = $_POST['hari'] ?? ['Semua Hari'];
+if (is_array($hariInput)) {
+    $hari = in_array('Semua Hari', $hariInput, true) ? 'Semua Hari' : implode(', ', $hariInput);
+} else {
+    $hari = trim((string) $hariInput);
+}
+if ($hari === '') {
+    $hari = 'Semua Hari';
+}
 
 if ($waktu === '') {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Waktu wajib diisi']);
     exit;
+}
+
+if ($catatan === '') {
+    $hour = (int) substr($waktu, 0, 2);
+    if ($hour < 11) {
+        $catatan = 'Pakan Pagi';
+    } elseif ($hour < 15) {
+        $catatan = 'Pakan Siang';
+    } else {
+        $catatan = 'Pakan Sore';
+    }
 }
 
 // Ensure HH:MM:SS
@@ -35,7 +58,9 @@ if ($success) {
     echo json_encode([
         'success' => true,
         'id' => $newId,
+        'catatan' => $catatan,
         'waktu' => substr($waktu, 0, 5),
+        'hari' => $hari,
         'message' => 'Jadwal berhasil ditambahkan',
     ]);
 } else {
