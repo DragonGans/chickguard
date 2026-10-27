@@ -9,7 +9,7 @@
 
 .sidebar {
   width: 270px;
-  background: #d8f2f3;
+  background: #d9f3f6;
   padding: 0;
   position: relative;
   z-index: 2;
@@ -101,7 +101,7 @@
 
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link {
-  background: #d8f2f3;
+  background: #d9f3f6;
   color: #0f172a;
   box-shadow: none;
   margin-right: 0;
@@ -124,7 +124,7 @@
   width: 20px;
   height: 20px;
   border-bottom-right-radius: 20px;
-  box-shadow: 6px 6px 0 6px #d8f2f3;
+  box-shadow: 6px 6px 0 6px #d9f3f6;
   background: transparent;
   pointer-events: none;
   animation: curvePop 0.35s ease both;
@@ -140,7 +140,7 @@
   width: 20px;
   height: 20px;
   border-top-right-radius: 20px;
-  box-shadow: 6px -6px 0 6px #d8f2f3;
+  box-shadow: 6px -6px 0 6px #d9f3f6;
   background: transparent;
   pointer-events: none;
   animation: curvePop 0.35s ease both;
@@ -152,7 +152,7 @@
 }
 
 .nav-pills .nav-link.active:hover {
-  background: #d8f2f3;
+  background: #d9f3f6;
   color: #0f172a;
 }
 
@@ -272,4 +272,9 @@
   .brand-wrap {
     margin: 0 0.8rem 1.1rem;
   }
+}
+
+
+.nav-pills .nav-link.active i {
+  color: #0d9488;
 }

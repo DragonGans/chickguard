@@ -14,7 +14,10 @@ body.page-log-harian .content-section {
 
 body.page-pencahayaan .hero-card {
   padding: 1.7rem 1.8rem;
-  border-radius: 22px;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 20px rgba(77, 109, 120, 0.16);
 }
 
 body.page-pencahayaan .hero-grid {
@@ -41,20 +44,20 @@ body.page-pencahayaan .hero-icon {
   display: grid;
   place-items: center;
   font-size: 2rem;
-  color: #f2bf4d;
-  background: #fff8e7;
+  color: #f59e0b;
+  background: #fef3c7;
   flex-shrink: 0;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
 }
 
 body.page-pencahayaan .hero-icon.is-on {
-  color: #f2bf4d;
-  background: #fff8e7;
+  color: #f59e0b;
+  background: #fef3c7;
 }
 
 body.page-pencahayaan .hero-icon.is-off {
   color: #94a3b8;
-  background: #eef2f7;
+  background: #f1f5f9;
 }
 
 body.page-pencahayaan .hero-title {
@@ -70,7 +73,7 @@ body.page-pencahayaan .toggle-pill {
   height: 28px;
   border: 0;
   border-radius: 999px;
-  background: #4ea3ea;
+  background: #10b981;
   position: relative;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   cursor: pointer;
@@ -80,7 +83,7 @@ body.page-pencahayaan .toggle-pill {
 }
 
 body.page-pencahayaan .toggle-pill:hover {
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 0 4px rgba(78, 163, 234, 0.14);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 0 4px rgba(16, 185, 129, 0.18);
 }
 
 body.page-pencahayaan .toggle-pill:active {
@@ -88,7 +91,7 @@ body.page-pencahayaan .toggle-pill:active {
 }
 
 body.page-pencahayaan .toggle-pill.is-on {
-  background: #4ea3ea;
+  background: #10b981;
 }
 
 body.page-pencahayaan .toggle-pill:not(.is-on) {
@@ -121,14 +124,14 @@ body.page-pencahayaan .status-pill-large {
   color: #fff;
   font-size: var(--cg-font-md);
   font-weight: 700;
-  background: linear-gradient(180deg, #4ea8ee, #2f8ddf);
-  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.25);
+  background: #10b981;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
   transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 body.page-pencahayaan .status-pill-large.is-off {
-  background: linear-gradient(180deg, #a8b3c2, #7f8b9b);
-  box-shadow: 0 8px 18px rgba(100, 116, 139, 0.18);
+  background: #64748b;
+  box-shadow: 0 4px 14px rgba(100, 116, 139, 0.18);
 }
 
 body.page-pencahayaan .action-btn {
@@ -152,16 +155,18 @@ body.page-pencahayaan .action-btn.is-active {
 }
 
 body.page-pencahayaan .action-btn.green {
-  background: #27c9a4;
+  background: #10b981;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
 }
 
 body.page-pencahayaan .action-btn.orange {
-  background: #ff6b2b;
+  background: #ef4444;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);
 }
 
 body.page-pencahayaan .add-btn {
-  background: #2ac8a3;
-  box-shadow: 0 10px 22px rgba(35, 195, 156, 0.28);
+  background: #0d9488;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.25);
 }
 
 body.page-pencahayaan .log-card {
@@ -194,8 +199,11 @@ body.page-pencahayaan .log-subtitle {
 
 body.page-pencahayaan .schedule-card {
   padding: 1rem 1rem 0;
-  border-radius: 22px;
-  margin-top: 1rem;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 20px rgba(77, 109, 120, 0.16);
+  margin-top: 1.5rem;
 }
 
 body.page-pencahayaan .schedule-table tbody tr:last-child td {

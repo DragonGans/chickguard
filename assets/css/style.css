@@ -15,9 +15,12 @@ body {
   --cg-panel: #ffffff;
   --cg-text: #121212;
   --cg-muted: #6b7280;
-  --cg-accent: #5cb6df;
-  --cg-accent-dark: #496d74;
-  --cg-shadow: 0 6px 20px rgba(26, 77, 89, 0.09), 0 2px 4px rgba(26, 77, 89, 0.04);
+  --cg-accent: #0d9488;
+  --cg-accent-dark: #0f766e;
+  --cg-primary-teal: #0d9488;
+  --cg-primary-mint: #10b981;
+  --cg-border: #e6f0f0;
+  --cg-shadow: 0 4px 20px rgba(77, 109, 120, 0.16);
   --cg-radius-xl: 28px;
   --cg-radius-lg: 24px;
   --cg-font-xs: 0.82rem;
@@ -274,8 +277,8 @@ body.page-log-harian {
 
 .card-soft {
   background: var(--cg-panel);
-  border: 0;
-  border-radius: var(--cg-radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
   box-shadow: var(--cg-shadow);
 }
 
@@ -330,7 +333,7 @@ body.page-log-harian {
 }
 
 .data-table thead th {
-  background: #7e9ea3;
+  background: #0d9488;
   color: #fff;
   font-size: var(--cg-font-base);
   font-weight: 700;
@@ -418,25 +421,35 @@ body.page-log-harian {
 .page-chip {
   min-width: 34px;
   height: 34px;
-  border: 1px solid #7f9fa5;
+  border: 1px solid #cbd5e1;
   border-radius: 10px;
   background: #fff;
-  color: #577980;
+  color: #475569;
   font-size: var(--cg-font-sm);
   display: grid;
   place-items: center;
   font-weight: 600;
   text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.page-chip:hover:not(.active):not(.muted) {
+  border-color: #0d9488;
+  color: #0d9488;
+  background: #f0fdf9;
 }
 
 .page-chip.active {
-  background: #7f9fa5;
+  background: #0d9488;
+  border-color: #0d9488;
   color: #fff;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.28);
 }
 
 .page-chip.muted {
-  border-color: #d7e0e3;
-  color: #bcc8cc;
+  border-color: #e2e8f0;
+  color: #cbd5e1;
+  pointer-events: none;
 }
 
 
@@ -652,15 +665,15 @@ body.page-log-harian {
   display: inline-block;
   margin-right: 10px;
   vertical-align: middle;
-  border: 2px solid #7b9ea2;
+  border: 2px solid #cbd5e1; border-radius: 6px;
   border-radius: 3px;
   background: #ffffff;
   position: relative;
 }
 
 .schedule-day input:checked + span::before {
-  background: #28c49b;
-  border-color: #28c49b;
+  background: #0d9488;
+  border-color: #0d9488;
 }
 
 .schedule-day input:checked + span::after {
@@ -1186,4 +1199,41 @@ body.page-pencahayaan .log-status-close:hover {
   .schedule-reset-btn {
     width: 100%;
   }
+}
+
+
+/* Uniform Button & Component Styles across ChickGuard */
+.btn-success {
+  background-color: #0d9488 !important;
+  border-color: #0d9488 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.22);
+}
+
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active {
+  background-color: #0f766e !important;
+  border-color: #0f766e !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.32);
+}
+
+.btn-outline-success {
+  color: #0d9488 !important;
+  border-color: #0d9488 !important;
+}
+
+.btn-outline-success:hover,
+.btn-outline-success:focus,
+.btn-outline-success:active {
+  background-color: #0d9488 !important;
+  border-color: #0d9488 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.22);
+}
+
+.badge.bg-success-subtle {
+  background-color: #e6f7f8 !important;
+  color: #0d9488 !important;
 }

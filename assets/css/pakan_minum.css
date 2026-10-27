@@ -20,11 +20,11 @@ body.page-pakan-minum .supply-icon {
 }
 
 body.page-pakan-minum .supply-icon.feed {
-  color: #22c59e;
+  color: #10b981;
 }
 
 body.page-pakan-minum .supply-icon.water {
-  color: #2cabed;
+  color: #0284c7;
 }
 
 body.page-pakan-minum .supply-title {
@@ -64,11 +64,11 @@ body.page-pakan-minum .progress-slim .progress-bar {
 }
 
 body.page-pakan-minum .progress-slim .progress-bar.bg-success {
-  background: #28c49b !important;
+  background: #10b981 !important;
 }
 
 body.page-pakan-minum .progress-slim .progress-bar.bg-info {
-  background: #2caef0 !important;
+  background: #0284c7 !important;
 }
 
 body.page-pakan-minum .overview-divider {
@@ -93,11 +93,13 @@ body.page-pakan-minum .action-btn:active {
 }
 
 body.page-pakan-minum .action-btn.feed {
-  background: #23c39c;
+  background: #10b981;
+  box-shadow: 0 8px 18px rgba(16, 185, 129, 0.28);
 }
 
 body.page-pakan-minum .action-btn.water {
-  background: #28acef;
+  background: #0284c7;
+  box-shadow: 0 8px 18px rgba(2, 132, 199, 0.28);
 }
 
 body.page-pakan-minum .action-slot {
@@ -111,8 +113,8 @@ body.page-pakan-minum .action-slot {
 }
 
 body.page-pakan-minum .add-btn {
-  background: #23c39c;
-  box-shadow: 0 8px 18px rgba(35, 195, 156, 0.3);
+  background: #0d9488;
+  box-shadow: 0 8px 18px rgba(13, 148, 136, 0.28);
 }
 
 body.page-pakan-minum .log-card {

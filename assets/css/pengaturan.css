@@ -118,9 +118,9 @@
 
 .form-control-modern:focus {
   background: #ffffff;
-  border-color: #5cb6df;
+  border-color: #0d9488;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(92, 182, 223, 0.25);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
 }
 
 .form-control-modern:disabled,
@@ -183,7 +183,7 @@
 }
 
 .btn-settings-secondary {
-  background: #496d74;
+  background: #475569;
   color: #ffffff;
   border: none;
   border-radius: 999px;
@@ -195,11 +195,11 @@
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(73, 109, 116, 0.25);
+  box-shadow: 0 4px 14px rgba(71, 85, 105, 0.25);
 }
 
 .btn-settings-secondary:hover {
-  background: #39575d;
+  background: #334155;
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(73, 109, 116, 0.35);
   color: #ffffff;

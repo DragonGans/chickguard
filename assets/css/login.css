@@ -5,8 +5,8 @@ o/* Login page styles */
   --cg-panel: #ffffff;
   --cg-text: #121212;
   --cg-muted: #6b7280;
-  --cg-accent: #5cb6df;
-  --cg-accent-dark: #496d74;
+  --cg-accent: #0d9488;
+  --cg-accent-dark: #0f766e;
   --cg-shadow: 0 10px 24px rgba(46, 85, 98, 0.18);
   --cg-radius-xl: 28px;
   --cg-radius-lg: 24px;
@@ -352,18 +352,19 @@ body {
   height: 46px;
   border: 0;
   border-radius: 12px;
-  background: linear-gradient(180deg, #88aeb3 0%, #789ca2 100%);
+  background: #0d9488;
   color: #fff;
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
-  box-shadow: 0 10px 20px rgba(120, 156, 162, 0.25);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 10px 20px rgba(13, 148, 136, 0.28);
+  transition: all 0.2s ease;
 }
 
 .btn:hover {
+  background: #0f766e;
   transform: translateY(-1px);
-  box-shadow: 0 12px 20px rgba(120, 156, 162, 0.32);
+  box-shadow: 0 12px 20px rgba(13, 148, 136, 0.38);
 }
 
 .forgot-link {
@@ -523,8 +524,8 @@ body {
 }
 
 .forgot-input:focus {
-  border-color: #5f8f97;
-  box-shadow: 0 0 0 5px rgba(123, 160, 167, 0.16);
+  border-color: #0d9488;
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15);
 }
 
 .forgot-submit {
@@ -533,16 +534,17 @@ body {
   margin-top: 18px;
   border: 0;
   border-radius: 11px;
-  background: #7fa2a4;
+  background: #0d9488;
   color: #fff;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 8px 16px rgba(127, 162, 164, 0.28);
+  box-shadow: 0 8px 16px rgba(13, 148, 136, 0.28);
+  transition: all 0.2s ease;
 }
 
 .forgot-submit:hover {
-  filter: brightness(0.98);
+  background: #0f766e;
 }
 
 .forgot-footer {
