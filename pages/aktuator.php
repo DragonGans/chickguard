@@ -280,33 +280,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
     <main class="main-content">
       <?php include '../components/topbar.php'; ?>
 
-            <!-- Bar Kontrol Aktuator (Nyalakan Semua Manual & Mode Otomatis) -->
-      <div class="actuator-control-bar p-3 p-md-4 mb-4 rounded-4 bg-white d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-        <div class="d-flex align-items-center gap-3">
-          <div class="control-bar-icon bg-success-subtle text-success">
-            <i class="bi bi-power fs-4"></i>
-          </div>
-          <div>
-            <h5 class="fw-bold mb-1 text-dark">Kontrol Perangkat Aktuator</h5>
-            <p class="text-muted small mb-0">Aktuator tetap bekerja secara otomatis sesuai sensor &amp; mikroklimat. Tersedia tombol khusus untuk menyalakan semua manual.</p>
-          </div>
-        </div>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          <button type="button" class="btn btn-success fw-bold px-3 py-2 rounded-pill d-inline-flex align-items-center gap-2 shadow-sm" id="btnNyalakanSemua">
-            <i class="bi bi-power fs-5"></i>
-            <span>Nyalakan Semua Manual</span>
-          </button>
-          <button type="button" class="btn btn-outline-danger fw-semibold px-3 py-2 rounded-pill d-inline-flex align-items-center gap-2" id="btnMatikanSemua">
-            <i class="bi bi-slash-circle fs-5"></i>
-            <span>Matikan Semua</span>
-          </button>
-          <button type="button" class="btn btn-outline-secondary fw-semibold px-3 py-2 rounded-pill d-inline-flex align-items-center gap-2" id="btnSinkronOtomasi">
-            <i class="bi bi-cpu fs-5"></i>
-            <span>Sinkronkan Otomasi</span>
-          </button>
-        </div>
-      </div>
-
+            
       <!-- 3 Interactive Big Actuator Cards Grid -->
       <div class="row g-3 g-xl-4 mb-4">
         <!-- 1. Kipas Ventilasi -->

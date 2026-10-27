@@ -190,7 +190,6 @@ for ($slot = 0; $slot <= 48; $slot++) {
 $actQuery = mysqli_query($koneksi, "SELECT * FROM actuator_status WHERE id = 1 LIMIT 1");
 $actuators = $actQuery ? mysqli_fetch_assoc($actQuery) : [
     'kipas' => 0,
-    'heater' => 0,
     'lampu' => 0,
     'motor_pakan' => 1,
 ];
@@ -378,7 +377,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
             </div>
           </div>
 
-          <!-- Right Column (Status Kandang + Jadwal Pakan) -->
+          <!-- Right Column (Status Kandang + Kontrol Aktuator) -->
           <div class="col-12 col-xl-4" id="pengaturan-section">
             <div class="d-flex flex-column gap-3 gap-xl-4 h-100">
               <!-- Status Kandang -->
@@ -434,11 +433,85 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
                 </div>
               </div>
 
-              <!-- Jadwal Pakan -->
-              <div class="dashboard-panel schedule-panel">
-                <div class="panel-header d-flex align-items-center gap-2">
-                  <i class="fa-solid fa-calendar-check text-secondary"></i>
-                  <span class="panel-title">Jadwal Pakan</span>
+              <!-- Kontrol Aktuator -->
+              <div class="dashboard-panel actuator-panel" id="aktuator-section">
+                <div class="panel-header d-flex justify-content-between align-items-center mb-3">
+                  <div class="panel-title d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-sliders text-secondary"></i>
+                    <span>Kontrol Aktuator</span>
+                  </div>
+                  <a href="aktuator.php" class="panel-link">Lihat Semua</a>
+                </div>
+
+                <div class="actuator-list mt-3 d-flex flex-column gap-3">
+                  <!-- Kipas -->
+                  <div class="actuator-row d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="actuator-icon-box box-fan">
+                        <i class="fa-solid fa-fan"></i>
+                      </div>
+                      <div>
+                        <div class="actuator-name">Kipas</div>
+                        <div class="actuator-state" id="state-kipas"><?= !empty($actuators['kipas']) ? 'Menyala' : 'Mati' ?></div>
+                      </div>
+                    </div>
+                    <label class="switch-ios">
+                      <input type="checkbox" id="toggle-kipas" data-actuator="kipas" <?= !empty($actuators['kipas']) ? 'checked' : '' ?>>
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+
+                  <!-- Lampu -->
+                  <div class="actuator-row d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="actuator-icon-box box-lamp">
+                        <i class="bi bi-lightbulb-fill"></i>
+                      </div>
+                      <div>
+                        <div class="actuator-name">Lampu</div>
+                        <div class="actuator-state" id="state-lampu"><?= !empty($actuators['lampu']) ? 'Menyala' : 'Mati' ?></div>
+                      </div>
+                    </div>
+                    <label class="switch-ios">
+                      <input type="checkbox" id="toggle-lampu" data-actuator="lampu" <?= !empty($actuators['lampu']) ? 'checked' : '' ?>>
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+
+                  <!-- Motor Pakan -->
+                  <div class="actuator-row d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="actuator-icon-box box-feeder">
+                        <i class="fa-solid fa-cubes-stacked"></i>
+                      </div>
+                      <div>
+                        <div class="actuator-name">Motor Pakan</div>
+                        <div class="actuator-state" id="state-motor_pakan"><?= !empty($actuators['motor_pakan']) ? 'Jadwal Aktif' : 'Mati' ?></div>
+                      </div>
+                    </div>
+                    <label class="switch-ios">
+                      <input type="checkbox" id="toggle-motor_pakan" data-actuator="motor_pakan" <?= !empty($actuators['motor_pakan']) ? 'checked' : '' ?>>
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Row (Jadwal Pakan, Log Data Terbaru, Notifikasi Terbaru) -->
+        <div class="row g-3 g-xl-4">
+          <!-- 1. Jadwal Pakan (Left Column) -->
+          <div class="col-12 col-xl-4" id="jadwal-section">
+            <div class="dashboard-panel schedule-panel h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div class="panel-header d-flex justify-content-between align-items-center mb-3">
+                  <div class="panel-title d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-calendar-check text-secondary"></i>
+                    <span>Jadwal Pakan</span>
+                  </div>
+                  <a href="pakan_minum.php" class="panel-link">Lihat Semua</a>
                 </div>
 
                 <div class="schedule-list mt-3 d-flex flex-column gap-3" id="scheduleListContainer">
@@ -461,97 +534,11 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
                     </div>
                   <?php endforeach; ?>
                 </div>
-
-                <button type="button" class="btn-atur-jadwal mt-3 w-100 js-open-schedule-modal">
-                  <i class="bi bi-calendar-check"></i> Atur Jadwal
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bottom Row (Kontrol Aktuator, Log Data Terbaru, Notifikasi Terbaru) -->
-        <div class="row g-3 g-xl-4">
-          <!-- 1. Kontrol Aktuator (Left Column) -->
-          <div class="col-12 col-xl-4" id="aktuator-section">
-            <div class="dashboard-panel actuator-panel h-100">
-              <div class="panel-header d-flex justify-content-between align-items-center mb-3">
-                <div class="panel-title d-flex align-items-center gap-2">
-                  <i class="fa-solid fa-sliders text-secondary"></i>
-                  <span>Kontrol Aktuator</span>
-                </div>
-                <a href="aktuator.php" class="panel-link">Lihat Semua</a>
               </div>
 
-              <div class="actuator-list mt-3 d-flex flex-column gap-3">
-                <!-- Kipas -->
-                <div class="actuator-row d-flex align-items-center justify-content-between">
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="actuator-icon-box box-fan">
-                      <i class="fa-solid fa-fan"></i>
-                    </div>
-                    <div>
-                      <div class="actuator-name">Kipas</div>
-                      <div class="actuator-state" id="state-kipas"><?= !empty($actuators['kipas']) ? 'Menyala' : 'Mati' ?></div>
-                    </div>
-                  </div>
-                  <label class="switch-ios">
-                    <input type="checkbox" id="toggle-kipas" data-actuator="kipas" <?= !empty($actuators['kipas']) ? 'checked' : '' ?>>
-                    <span class="slider round"></span>
-                  </label>
-                </div>
-
-                <!-- Heater -->
-                <div class="actuator-row d-flex align-items-center justify-content-between">
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="actuator-icon-box box-heater">
-                      <i class="fa-solid fa-temperature-arrow-up"></i>
-                    </div>
-                    <div>
-                      <div class="actuator-name">Heater</div>
-                      <div class="actuator-state" id="state-heater"><?= !empty($actuators['heater']) ? 'Menyala' : 'Mati' ?></div>
-                    </div>
-                  </div>
-                  <label class="switch-ios">
-                    <input type="checkbox" id="toggle-heater" data-actuator="heater" <?= !empty($actuators['heater']) ? 'checked' : '' ?>>
-                    <span class="slider round"></span>
-                  </label>
-                </div>
-
-                <!-- Lampu -->
-                <div class="actuator-row d-flex align-items-center justify-content-between">
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="actuator-icon-box box-lamp">
-                      <i class="bi bi-lightbulb-fill"></i>
-                    </div>
-                    <div>
-                      <div class="actuator-name">Lampu</div>
-                      <div class="actuator-state" id="state-lampu"><?= !empty($actuators['lampu']) ? 'Menyala' : 'Mati' ?></div>
-                    </div>
-                  </div>
-                  <label class="switch-ios">
-                    <input type="checkbox" id="toggle-lampu" data-actuator="lampu" <?= !empty($actuators['lampu']) ? 'checked' : '' ?>>
-                    <span class="slider round"></span>
-                  </label>
-                </div>
-
-                <!-- Motor Pakan -->
-                <div class="actuator-row d-flex align-items-center justify-content-between">
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="actuator-icon-box box-feeder">
-                      <i class="fa-solid fa-cubes-stacked"></i>
-                    </div>
-                    <div>
-                      <div class="actuator-name">Motor Pakan</div>
-                      <div class="actuator-state" id="state-motor_pakan"><?= !empty($actuators['motor_pakan']) ? 'Jadwal Aktif' : 'Mati' ?></div>
-                    </div>
-                  </div>
-                  <label class="switch-ios">
-                    <input type="checkbox" id="toggle-motor_pakan" data-actuator="motor_pakan" <?= !empty($actuators['motor_pakan']) ? 'checked' : '' ?>>
-                    <span class="slider round"></span>
-                  </label>
-                </div>
-              </div>
+              <button type="button" class="btn-atur-jadwal mt-3 w-100 js-open-schedule-modal">
+                <i class="bi bi-calendar-check"></i> Atur Jadwal
+              </button>
             </div>
           </div>
 
@@ -1154,7 +1141,6 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
       /* ================= Aktuator ================= */
       const actuatorLabels = {
         kipas: ["Mati", "Menyala"],
-        heater: ["Mati", "Menyala"],
         lampu: ["Mati", "Menyala"],
         motor_pakan: ["Mati", "Jadwal Aktif"],
       };
