@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 
 if (!isset($_SESSION['login'])) {
@@ -244,16 +244,16 @@ $umurAyamHari = max(0, (int) round((strtotime('today') - $tglMasukTs) / 86400));
         </div>
 
         <div class="modal-body px-4 py-3">
-          <!-- Modern Pill Tabs -->
-          <ul class="nav nav-pills modern-modal-pills mb-3 gap-2" id="userSettingsTab" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="tab-profil-btn" data-bs-toggle="pill" data-bs-target="#tab-profil" type="button" role="tab" aria-controls="tab-profil" aria-selected="true">
-                <i class="bi bi-person-badge me-1.5"></i> Pengaturan User
+          <!-- Minimalist Pill Tabs -->
+          <ul class="nav nav-pills simple-modal-pills" id="userSettingsTab" role="tablist">
+            <li class="nav-item flex-fill" role="presentation">
+              <button class="nav-link active w-100" id="tab-profil-btn" data-bs-toggle="pill" data-bs-target="#tab-profil" type="button" role="tab" aria-controls="tab-profil" aria-selected="true">
+                <i class="bi bi-person me-2"></i> Pengaturan User
               </button>
             </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="tab-password-btn" data-bs-toggle="pill" data-bs-target="#tab-password" type="button" role="tab" aria-controls="tab-password" aria-selected="false">
-                <i class="bi bi-shield-lock-fill me-1.5"></i> Keamanan & Password
+            <li class="nav-item flex-fill" role="presentation">
+              <button class="nav-link w-100" id="tab-password-btn" data-bs-toggle="pill" data-bs-target="#tab-password" type="button" role="tab" aria-controls="tab-password" aria-selected="false">
+                <i class="bi bi-shield-lock me-2"></i> Keamanan &amp; Password
               </button>
             </li>
           </ul>

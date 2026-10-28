@@ -1,4 +1,4 @@
-/* Shared sidebar styles */
+﻿/* Shared sidebar styles */
 
 .dashboard-shell {
   min-height: 100vh;
@@ -79,7 +79,7 @@
   padding-right: 0;
 }
 
-.nav-pills .nav-link {
+.sidebar .nav-pills .nav-link {
   position: relative;
   border-radius: 24px;
   color: var(--cg-text);
@@ -94,13 +94,13 @@
   z-index: 1;
 }
 
-.nav-pills .nav-link i {
+.sidebar .nav-pills .nav-link i {
   font-size: 1.35rem;
   line-height: 1;
 }
 
-.nav-pills .nav-link.active,
-.nav-pills .show > .nav-link {
+.sidebar .nav-pills .nav-link.active,
+.sidebar .nav-pills .show > .nav-link {
   background: #d9f3f6;
   color: #0f172a;
   box-shadow: none;
@@ -114,8 +114,8 @@
   animation: navSlideIn 0.35s ease both;
 }
 
-.nav-pills .nav-link.active::before,
-.nav-pills .show > .nav-link::before,
+.sidebar .nav-pills .nav-link.active::before,
+.sidebar .nav-pills .show > .nav-link::before,
 .sidebar ul li.active::before {
   content: "";
   position: absolute;
@@ -130,8 +130,8 @@
   animation: curvePop 0.35s ease both;
 }
 
-.nav-pills .nav-link.active::after,
-.nav-pills .show > .nav-link::after,
+.sidebar .nav-pills .nav-link.active::after,
+.sidebar .nav-pills .show > .nav-link::after,
 .sidebar ul li.active::after {
   content: "";
   position: absolute;
@@ -146,12 +146,12 @@
   animation: curvePop 0.35s ease both;
 }
 
-.nav-pills .nav-link:not(.active):hover {
+.sidebar .nav-pills .nav-link:not(.active):hover {
   background: #f1f5f9;
   color: #0f172a;
 }
 
-.nav-pills .nav-link.active:hover {
+.sidebar .nav-pills .nav-link.active:hover {
   background: #d9f3f6;
   color: #0f172a;
 }
@@ -276,6 +276,6 @@
 }
 
 
-.nav-pills .nav-link.active i {
+.sidebar .nav-pills .nav-link.active i {
   color: #0d9488;
 }

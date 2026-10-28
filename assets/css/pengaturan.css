@@ -261,29 +261,71 @@
   box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
 }
 
-/* Modal Nav Pills */
+/* ==========================================================================
+   Minimalist Modal Pill Tabs
+   ========================================================================== */
+.simple-modal-pills,
 .modern-modal-pills {
   background: #f1f5f9;
-  padding: 0.35rem;
-  border-radius: 14px;
+  border-radius: 999px;
+  padding: 4px;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 4px;
+  margin: 0 0 1.25rem 0 !important;
+  list-style: none !important;
 }
 
+.simple-modal-pills .nav-item,
+.modern-modal-pills .nav-item {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+}
+
+.simple-modal-pills .nav-link,
 .modern-modal-pills .nav-link {
-  color: #64748b;
-  font-weight: 600;
-  font-size: 0.86rem;
-  border-radius: 10px;
-  padding: 0.5rem 1.15rem;
-  transition: all 0.2s ease;
-  border: none;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.6rem 1rem !important;
+  border-radius: 999px !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+  background: transparent !important;
+  border: none !important;
+  transition: all 0.2s ease !important;
+  margin: 0 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+  animation: none !important;
 }
 
-.modern-modal-pills .nav-link:hover {
-  color: #0d9488;
+.simple-modal-pills .nav-link::before,
+.simple-modal-pills .nav-link::after,
+.modern-modal-pills .nav-link::before,
+.modern-modal-pills .nav-link::after {
+  display: none !important;
+  content: none !important;
+  box-shadow: none !important;
 }
 
+.simple-modal-pills .nav-link:not(.active):hover,
+.modern-modal-pills .nav-link:not(.active):hover {
+  color: #0f172a !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+
+.simple-modal-pills .nav-link.active,
 .modern-modal-pills .nav-link.active {
-  background: #ffffff;
-  color: #0d9488;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: #0d9488 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3) !important;
+}
+
+.simple-modal-pills .nav-link.active i,
+.modern-modal-pills .nav-link.active i {
+  color: #ffffff !important;
 }
