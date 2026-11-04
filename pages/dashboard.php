@@ -21,7 +21,6 @@ $username = $_SESSION['username'] ?? 'admin';
  * -------------------------------------------------------------------------- */
 $settingQuery = mysqli_query($koneksi, "SELECT * FROM pengaturan_kandang WHERE id = 1 LIMIT 1");
 $settings = $settingQuery ? mysqli_fetch_assoc($settingQuery) : [
-    'nama_kandang'        => 'Kandang 1 - Utama',
     'tanggal_masuk_ayam'  => date('Y-m-d', strtotime('-18 days')),
     'suhu_min'            => 24.0,
     'suhu_maks'           => 34.0,
@@ -54,7 +53,7 @@ $mingguKe = intdiv($umurAyamHari, 7) + 1;
 $tglMasukFormatted = date('d M Y', $tglMasukTs);
 
 $topbarTitle = 'Selamat Datang, ' . $username . '!';
-$topbarSubtitle = 'Pantau kondisi ' . htmlspecialchars($settings['nama_kandang']) . ' • Umur Ayam: ' . $umurAyamHari . ' Hari (' . $faseAyam . ') secara real-time.';
+$topbarSubtitle = 'Pantau kondisi kandang • Umur Ayam: ' . $umurAyamHari . ' Hari (' . $faseAyam . ') secara real-time.';
 
 /* ----------------------------------------------------------------------------
  * Pembacaan sensor terakhir
@@ -699,11 +698,6 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         </div>
         <form id="formPengaturan">
           <div class="modal-body">
-            <div class="mb-3">
-              <label for="inputNamaKandang" class="form-label fw-semibold text-secondary">Nama Kandang</label>
-              <input type="text" class="form-control rounded-3" id="inputNamaKandang" name="nama_kandang"
-                     value="<?= htmlspecialchars($settings['nama_kandang'], ENT_QUOTES, 'UTF-8') ?>" required>
-            </div>
             <div class="row">
               <div class="col-6 mb-3">
                 <label for="inputSuhuMin" class="form-label fw-semibold text-secondary">Suhu Minimum (&deg;C)</label>

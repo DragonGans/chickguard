@@ -24,7 +24,6 @@ $topbarSubtitle = 'Kontrol sakelar kipas, pencahayaan, dan motor servo pakan sec
  * -------------------------------------------------------------------------- */
 $settingQuery = mysqli_query($koneksi, "SELECT * FROM pengaturan_kandang WHERE id = 1 LIMIT 1");
 $settings = $settingQuery ? mysqli_fetch_assoc($settingQuery) : [
-    'nama_kandang'    => 'Kandang 1 - Utama',
     'suhu_min'        => 24.0,
     'suhu_maks'       => 34.0,
     'kelembaban_min'  => 55.0,
@@ -528,11 +527,6 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         </div>
         <form id="formPengaturan">
           <div class="modal-body">
-            <div class="mb-3">
-              <label for="inputNamaKandang" class="form-label fw-semibold text-secondary">Nama Kandang</label>
-              <input type="text" class="form-control rounded-3" id="inputNamaKandang" name="nama_kandang"
-                     value="<?= htmlspecialchars($settings['nama_kandang'], ENT_QUOTES, 'UTF-8') ?>" required>
-            </div>
             <div class="row">
               <div class="col-6 mb-3">
                 <label for="inputSuhuMin" class="form-label fw-semibold text-secondary">Suhu Minimum (&deg;C)</label>

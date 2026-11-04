@@ -39,7 +39,6 @@ $topbarSubtitle = 'Kelola profil akun (username & email), password, dan paramete
 // Query Pengaturan Kandang
 $settingQuery = mysqli_query($koneksi, "SELECT * FROM pengaturan_kandang WHERE id = 1 LIMIT 1");
 $settings = $settingQuery ? mysqli_fetch_assoc($settingQuery) : [
-    'nama_kandang'        => 'Kandang 1 - Utama',
     'tanggal_masuk_ayam'  => date('Y-m-d', strtotime('-18 days')),
     'suhu_min'            => 24.0,
     'suhu_maks'           => 34.0,
@@ -112,34 +111,22 @@ $umurAyamHari = max(0, (int) round((strtotime('today') - $tglMasukTs) / 86400));
         </div>
       </div>
 
-      <!-- Settings Grid Sections -->
-      <div class="row g-3 g-xl-4 mb-4">
-        <!-- Pengaturan Kandang (Nama Kandang, Tanggal Masuk Ayam, Ambang Batas Sensor) -->
-        <div class="col-12">
-          <div class="settings-card">
+      <!-- Settings Section -->
+      <div class="mb-4">
+        <!-- Pengaturan Kandang (Tanggal Masuk Ayam, Ambang Batas Sensor) -->
+        <div class="settings-card">
             <div class="settings-header">
               <div>
                 <h3 class="settings-title">
                   <i class="bi bi-house-gear-fill" style="color:#0d9488;"></i>
                   <span>Pengaturan Kandang & Umur Ayam</span>
                 </h3>
-                <p class="settings-subtitle">Atur nama kandang, tanggal masuk ayam untuk pelacakan umur ayam di dashboard, serta batas aman sensor</p>
+                <p class="settings-subtitle">Atur tanggal masuk ayam untuk pelacakan umur ayam di dashboard, serta batas aman sensor</p>
               </div>
             </div>
 
             <form id="formPengaturanKandang" autocomplete="off">
               <div class="row g-3">
-                <!-- Nama Kandang -->
-                <div class="col-12 col-md-6 col-lg-4">
-                  <div class="form-group-modern">
-                    <label for="inputNamaKandang" class="form-label-modern">
-                      <i class="bi bi-house-door text-muted"></i> Nama Kandang
-                    </label>
-                    <input type="text" class="form-control-modern" id="inputNamaKandang" name="nama_kandang" 
-                           value="<?= htmlspecialchars($settings['nama_kandang'], ENT_QUOTES, 'UTF-8') ?>" required>
-                  </div>
-                </div>
-
                 <!-- Tanggal Masuk Ayam -->
                 <div class="col-12 col-md-6 col-lg-4">
                   <div class="form-group-modern">
@@ -220,7 +207,6 @@ $umurAyamHari = max(0, (int) round((strtotime('today') - $tglMasukTs) / 86400));
                 </button>
               </div>
             </form>
-          </div>
         </div>
       </div>
     </main>
@@ -540,7 +526,6 @@ $umurAyamHari = max(0, (int) round((strtotime('today') - $tglMasukTs) / 86400));
           btnSaveKandang.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
 
           const values = {
-            nama_kandang: document.getElementById("inputNamaKandang").value.trim(),
             tanggal_masuk_ayam: document.getElementById("inputTanggalMasuk").value,
             suhu_min: document.getElementById("inputSuhuMin").value,
             suhu_maks: document.getElementById("inputSuhuMaks").value,

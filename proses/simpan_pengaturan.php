@@ -14,7 +14,6 @@ chickguard_init_tables($koneksi);
 
 $raw = json_decode(file_get_contents('php://input'), true) ?? $_POST;
 
-$nama = trim($raw['nama_kandang'] ?? 'Kandang 1 - Utama');
 $tglMasuk = trim($raw['tanggal_masuk_ayam'] ?? '');
 $suhuMin = (float) ($raw['suhu_min'] ?? 24.0);
 $suhuMaks = (float) ($raw['suhu_maks'] ?? 34.0);
@@ -22,12 +21,6 @@ $lembapMin = (float) ($raw['kelembaban_min'] ?? 55.0);
 $lembapMaks = (float) ($raw['kelembaban_maks'] ?? 75.0);
 $cahayaMin = (float) ($raw['cahaya_min'] ?? 500.0);
 $airMin = (float) ($raw['level_air_min'] ?? 50.0);
-
-if ($nama === '') {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Nama kandang wajib diisi']);
-    exit;
-}
 
 if ($tglMasuk === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tglMasuk)) {
     $tglMasuk = date('Y-m-d', strtotime('-18 days'));
@@ -51,17 +44,17 @@ if ($cek && mysqli_num_rows($cek) > 0) {
     $stmt = mysqli_prepare(
         $koneksi,
         "UPDATE pengaturan_kandang
-         SET nama_kandang = ?, tanggal_masuk_ayam = ?, suhu_min = ?, suhu_maks = ?, kelembaban_min = ?, kelembaban_maks = ?, cahaya_min = ?, level_air_min = ?
+         SET tanggal_masuk_ayam = ?, suhu_min = ?, suhu_maks = ?, kelembaban_min = ?, kelembaban_maks = ?, cahaya_min = ?, level_air_min = ?
          WHERE id = 1"
     );
-    mysqli_stmt_bind_param($stmt, "ssdddddd", $nama, $tglMasuk, $suhuMin, $suhuMaks, $lembapMin, $lembapMaks, $cahayaMin, $airMin);
+    mysqli_stmt_bind_param($stmt, "sdddddd", $tglMasuk, $suhuMin, $suhuMaks, $lembapMin, $lembapMaks, $cahayaMin, $airMin);
 } else {
     $stmt = mysqli_prepare(
         $koneksi,
-        "INSERT INTO pengaturan_kandang (id, nama_kandang, tanggal_masuk_ayam, suhu_min, suhu_maks, kelembaban_min, kelembaban_maks, cahaya_min, level_air_min)
-         VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO pengaturan_kandang (id, tanggal_masuk_ayam, suhu_min, suhu_maks, kelembaban_min, kelembaban_maks, cahaya_min, level_air_min)
+         VALUES (1, ?, ?, ?, ?, ?, ?, ?)"
     );
-    mysqli_stmt_bind_param($stmt, "ssdddddd", $nama, $tglMasuk, $suhuMin, $suhuMaks, $lembapMin, $lembapMaks, $cahayaMin, $airMin);
+    mysqli_stmt_bind_param($stmt, "sdddddd", $tglMasuk, $suhuMin, $suhuMaks, $lembapMin, $lembapMaks, $cahayaMin, $airMin);
 }
 
 $success = mysqli_stmt_execute($stmt);
@@ -80,7 +73,6 @@ echo json_encode([
     'success' => true,
     'message' => 'Pengaturan kandang & tanggal masuk ayam berhasil disimpan',
     'settings' => [
-        'nama_kandang' => $nama,
         'tanggal_masuk_ayam' => $tglMasuk,
         'umur_ayam_hari' => $umurAyamHari,
         'suhu_min' => $suhuMin,

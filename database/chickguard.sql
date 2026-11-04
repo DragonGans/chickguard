@@ -237,7 +237,6 @@ DROP TABLE IF EXISTS `pengaturan_kandang`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `pengaturan_kandang` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nama_kandang` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Kandang 1 - Utama',
   `tanggal_masuk_ayam` date DEFAULT '2026-10-07',
   `suhu_min` decimal(5,2) NOT NULL DEFAULT '24.00',
   `suhu_maks` decimal(5,2) NOT NULL DEFAULT '34.00',
@@ -256,7 +255,7 @@ CREATE TABLE `pengaturan_kandang` (
 
 LOCK TABLES `pengaturan_kandang` WRITE;
 /*!40000 ALTER TABLE `pengaturan_kandang` DISABLE KEYS */;
-INSERT INTO `pengaturan_kandang` VALUES (1,'Kandang 1 - Utama','2026-10-07',24.00,34.00,55.00,75.00,500.00,50.00,'2026-10-22 06:59:29');
+INSERT INTO `pengaturan_kandang` VALUES (1,'2026-10-07',24.00,34.00,55.00,75.00,500.00,50.00,'2026-10-22 06:59:29');
 /*!40000 ALTER TABLE `pengaturan_kandang` ENABLE KEYS */;
 UNLOCK TABLES;
 
