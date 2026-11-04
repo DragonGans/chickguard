@@ -20,7 +20,7 @@ $value = isset($data['value']) ? (int) $data['value'] : null;
 // Batch toggle all
 if ($actuator === 'all') {
     $val = ($value === 1) ? 1 : 0;
-    $stmt = mysqli_prepare($koneksi, "UPDATE actuator_status SET kipas = ?, heater = 0, lampu = ?, motor_pakan = ? WHERE id = 1");
+    $stmt = mysqli_prepare($koneksi, "UPDATE actuator_status SET kipas = ?, lampu = ?, motor_pakan = ? WHERE id = 1");
     mysqli_stmt_bind_param($stmt, "iii", $val, $val, $val);
     $executed = mysqli_stmt_execute($stmt);
 
@@ -38,7 +38,6 @@ if ($actuator === 'all') {
             'message' => $actionMsg,
             'actuators' => [
                 'kipas' => $val,
-                'heater' => 0,
                 'lampu' => $val,
                 'motor_pakan' => $val,
             ]
@@ -66,11 +65,10 @@ if ($actuator === 'auto') {
     $cahaya = $sensor ? (float)$sensor['cahaya'] : 1000;
 
     $kipas = ($suhu > (float)$settings['suhu_maks']) ? 1 : 0;
-    $heater = 0;
     $lampu = ($cahaya < (float)$settings['cahaya_min']) ? 1 : 0;
     $motor = 0;
 
-    $stmt = mysqli_prepare($koneksi, "UPDATE actuator_status SET kipas = ?, heater = 0, lampu = ?, motor_pakan = ? WHERE id = 1");
+    $stmt = mysqli_prepare($koneksi, "UPDATE actuator_status SET kipas = ?, lampu = ?, motor_pakan = ? WHERE id = 1");
     mysqli_stmt_bind_param($stmt, "iii", $kipas, $lampu, $motor);
     $executed = mysqli_stmt_execute($stmt);
 
@@ -87,7 +85,6 @@ if ($actuator === 'auto') {
             'message' => $actionMsg,
             'actuators' => [
                 'kipas' => $kipas,
-                'heater' => $heater,
                 'lampu' => $lampu,
                 'motor_pakan' => $motor,
             ]
@@ -100,7 +97,7 @@ if ($actuator === 'auto') {
     }
 }
 
-$allowed = ['kipas', 'heater', 'lampu', 'motor_pakan'];
+$allowed = ['kipas', 'lampu', 'motor_pakan'];
 if (!in_array($actuator, $allowed, true) || ($value !== 0 && $value !== 1)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Invalid parameters']);
@@ -114,14 +111,12 @@ $executed = mysqli_stmt_execute($stmt);
 if ($executed) {
     $labels = [
         'kipas' => $value ? 'Menyala' : 'Mati',
-        'heater' => $value ? 'Menyala' : 'Mati',
         'lampu' => $value ? 'Menyala' : 'Mati',
         'motor_pakan' => $value ? 'Menyala' : 'Mati',
     ];
 
     $actuatorNames = [
         'kipas' => 'Kipas Ventilasi',
-        'heater' => 'Heater Pemanas',
         'lampu' => 'Lampu Penerangan',
         'motor_pakan' => 'Motor Pakan',
     ];

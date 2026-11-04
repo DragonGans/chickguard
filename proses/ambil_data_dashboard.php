@@ -110,7 +110,6 @@ if (!$latestSensor) {
 $actQuery = mysqli_query($koneksi, "SELECT * FROM actuator_status WHERE id = 1 LIMIT 1");
 $actuators = $actQuery ? mysqli_fetch_assoc($actQuery) : [
     'kipas' => 0,
-    'heater' => 0,
     'lampu' => 0,
     'motor_pakan' => 1,
 ];

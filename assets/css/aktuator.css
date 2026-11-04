@@ -75,23 +75,6 @@
   to { transform: rotate(360deg); }
 }
 
-.icon-heater {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.actuator-card-grid.is-active .icon-heater {
-  background: #ffedd5;
-  color: #ea580c;
-  animation: pulseWarm 2s ease-in-out infinite;
-}
-
-@keyframes pulseWarm {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.4); }
-  50% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(234, 88, 12, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); }
-}
-
 .icon-lamp {
   background: #f1f5f9;
   color: #475569;

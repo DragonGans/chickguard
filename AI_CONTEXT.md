@@ -2,6 +2,7 @@
 
 > File ini adalah "handoff document" untuk AI atau developer yang melanjutkan proyek **ChickGuard**.
 > Baca file ini dulu sebelum mengubah kode. Untuk dokumentasi publik (instalasi, fitur, screenshot), lihat `README.md`.
+> Untuk rencana integrasi sensor fisik (ESP32), lihat `INTEGRASI_SENSOR.md`.
 
 ---
 
@@ -35,7 +36,7 @@ chickguard/
 │   └── chickguard.sql  # Dump skema awal (tapi lihat §6: init_tables.php lebih otoritatif)
 ├── pages/              # Halaman utama (butuh login), di-serve langsung dari browser
 │   ├── dashboard.php       # metrik real-time, grafik 24 jam, polling AJAX 30 detik
-│   ├── aktuator.php        # kontrol kipas/heater/lampu/motor_pakan + polling
+│   ├── aktuator.php        # kontrol kipas/lampu/motor_pakan + polling
 │   ├── pakan.php           # CRUD jadwal pakan + log pemberian pakan
 │   ├── log_harian.php      # riwayat data sensor (search, paginasi, bulk delete)
 │   ├── pencahayaan.php     # konfigurasi lampu/pencahayaan
@@ -44,7 +45,7 @@ chickguard/
 │   ├── helpers.php             # fungsi bersama: waktu_notifikasi(), cg_status_metrik(), cg_status_kandang()
 │   ├── init_tables.php         # auto-migration + seeder (dipanggil SETIAP halaman load)
 │   ├── ambil_data_dashboard.php # GET JSON: sensor+aktuator+notifikasi+status; ?simulate=1 push data simulasi
-│   ├── toggle_aktuator.php     # POST JSON: actuator=kipas|heater|lampu|motor_pakan|all|auto, value=0|1
+│   ├── toggle_aktuator.php     # POST JSON: actuator=kipas|lampu|motor_pakan|all|auto, value=0|1
 │   ├── toggle_jadwal.php       # POST JSON: aktif/nonaktif jadwal pakan
 │   ├── tambah_jadwal_cepat.php # POST JSON: quick-add jadwal (06:00/12:00/16:00)
 │   ├── proses_pakan.php        # form handler CRUD jadwal (?action=delete, delete_selected, update, create)
@@ -141,7 +142,7 @@ Contoh: `proses/proses_pakan.php` — cek sesi → proses `$_POST`/`$_GET['actio
 - **Tidak ada ORM / abstraction layer** — query SQL ditulis inline di file endpoint/halaman.
 - Escape output HTML dengan `htmlspecialchars($val, ENT_QUOTES, 'UTF-8')`.
 - Casting eksplisit: `(int)`, `(float)`, `trim()` untuk input.
-- Whitelist untuk kolom dinamis (lihat `toggle_aktuator.php`: `$allowed = ['kipas','heater','lampu','motor_pakan']` sebelum interpolasi ke SQL).
+- Whitelist untuk kolom dinamis (lihat `toggle_aktuator.php`: `$allowed = ['kipas','lampu','motor_pakan']` sebelum interpolasi ke SQL).
 
 ### 3.5 Self-Healing Migration (`proses/init_tables.php`)
 
@@ -175,7 +176,7 @@ Kalau nanti integrasi ESP32/NodeMCU sungguhan: perangkat POST ke tabel `data_sen
 | Tabel | Catatan penting |
 |---|---|
 | `users` | id, username, password (hash `password_hash()` BCRYPT / `PASSWORD_DEFAULT`), role, email, nama_lengkap |
-| `actuator_status` | **Satu baris saja, `id = 1`**: kipas, heater, lampu, motor_pakan (TINYINT 0/1), updated_at |
+| `actuator_status` | **Satu baris saja, `id = 1`**: kipas, lampu, motor_pakan (TINYINT 0/1), updated_at. Kolom `heater` sudah dihapus dari proyek (Nov 2026) — pemanasan cukup dari lampu |
 | `data_sensor` | suhu, kelembaban, cahaya, level_air, recorded_at |
 | `jadwal_pakan` | waktu (TIME), jumlah (DECIMAL kg), hari (string CSV: `"Semua Hari"` atau `"Senin, Rabu"`), catatan, is_active |
 | `log_pemberian_pakan` | waktu, metode (`Otomatis`/`Manual`), status (`Berhasil`/...), keterangan |

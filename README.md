@@ -38,7 +38,7 @@
 
 ## 🐣 Tentang ChickGuard
 
-**ChickGuard** adalah aplikasi web monitoring dan manajemen kandang ayam modern yang dirancang untuk mendukung ekosistem **Internet of Things (IoT)** pada peternakan ayam. Sistem ini mempermudah peternak dalam mengawasi parameter lingkungan kandang (suhu, kelembaban, intensitas cahaya, dan ketersediaan air minum) serta mengendalikan perangkat aktuator seperti kipas ventilasi, pemanas (heater), lampu kandang, dan motor servo pakan secara manual maupun otomatis.
+**ChickGuard** adalah aplikasi web monitoring dan manajemen kandang ayam modern yang dirancang untuk mendukung ekosistem **Internet of Things (IoT)** pada peternakan ayam. Sistem ini mempermudah peternak dalam mengawasi parameter lingkungan kandang (suhu, kelembaban, intensitas cahaya, dan ketersediaan air minum) serta mengendalikan perangkat aktuator seperti kipas ventilasi, lampu kandang, dan motor servo pakan secara manual maupun otomatis.
 
 Aplikasi ini dilengkapi dengan algoritma pintar untuk menghitung umur ayam dan menentukan fase pemeliharaan (**Starter**, **Grower**, **Finisher**), memberikan status peringatan dinamis berdasarkan ambang batas (*threshold*), serta menampilkan grafik fluktuasi lingkungan selama 24 jam terakhir.
 
@@ -57,7 +57,6 @@ Aplikasi ini dilengkapi dengan algoritma pintar untuk menghitung umur ayam dan m
 ### 2. 🎛️ Kontrol Aktuator IoT
 - Sakelar kontrol digital untuk:
   - 🌀 **Kipas Ventilasi (Exhaust Fan)**
-  - 🌡️ **Pemanas (Heater / Brooder)**
   - 💡 **Lampu Penerangan Kandang**
   - 🥣 **Motor Servo Dispenser Pakan**
 - Respon instan berbasis AJAX (`toggle_aktuator.php`) dengan sinkronisasi ke tabel `actuator_status`.
@@ -129,7 +128,7 @@ Database default bernama **`chickguard`** terdiri dari beberapa tabel utama:
 | Nama Tabel | Deskripsi Fungsi |
 | :--- | :--- |
 | `users` | Menyimpan data akun pengguna/admin (id, username, password hash, role, email). |
-| `actuator_status` | Menyimpan status sakelar digital aktuator (kipas, heater, lampu, motor pakan). |
+| `actuator_status` | Menyimpan status sakelar digital aktuator (kipas, lampu, motor pakan). |
 | `data_sensor` | Telemetri sensor real-time (suhu, kelembaban, cahaya, level air, waktu rekam). |
 | `jadwal_pakan` | Konfigurasi jadwal pemberian pakan otomatis (waktu, porsi, hari aktif, catatan). |
 | `log_pemberian_pakan` | Riwayat eksekusi dispenser pakan manual maupun terjadwal. |
@@ -275,7 +274,7 @@ Setelah database diimport, gunakan akun bawaan berikut untuk login:
 Sistem ini didesain agar mudah diintegrasikan dengan mikrokontroler (misalnya **ESP32 / NodeMCU ESP8266**):
 
 - **Data Sensor**: Endpoint `proses/ambil_data_dashboard.php` menyertakan generator simulasi data sensor dinamis yang menyesuaikan siklus jam siang/malam apabila perangkat fisik IoT belum terhubung.
-- **Kontrol Relay Aktuator**: Endpoint `proses/toggle_aktuator.php` menerima permintaan `POST` untuk mengubah status perangkat (`kipas`, `heater`, `lampu`, `motor_pakan`) yang dapat dibaca oleh mikrokontroler melalui polling HTTP GET/POST berkala.
+- **Kontrol Relay Aktuator**: Endpoint `proses/toggle_aktuator.php` menerima permintaan `POST` untuk mengubah status perangkat (`kipas`, `lampu`, `motor_pakan`) yang dapat dibaca oleh mikrokontroler melalui polling HTTP GET/POST berkala.
 - **Inisialisasi Otomatis**: Setiap kali halaman dibuka, fungsi `chickguard_init_tables()` memastikan seluruh tabel pendukung telah tersedia sehingga sistem tahan terhadap variasi versi database dump.
 
 ---
