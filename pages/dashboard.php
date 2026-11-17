@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION['login'])) {
     header("Location: ../login.php");
@@ -85,7 +87,7 @@ $stAir = ($valAir >= (float) $settings['level_air_min'])
     : ['label' => 'Rendah', 'class' => 'status-warning'];
 
 /* ----------------------------------------------------------------------------
- * Data grafik 24 jam (punggil data nyata + model harian sebagai pengisi)
+ * Data grafik 24 jam (panggil data nyata + model harian sebagai pengisi)
  * -------------------------------------------------------------------------- */
 $suhuScaleK = 1.4;    // faktor skala ke sumbu 0-100
 $cahayaScaleK = 65.0; // lux dibagi faktor ini
@@ -112,36 +114,38 @@ foreach ($rows24 as $row) {
  * Model lingkungan harian (meniru pola di mockup: dingin malam, panas siang).
  * Menghasilkan [suhu, kelembaban, cahaya, level_air]
  */
-function cg_model(float $t): array
-{
-    // Level air: linear interpolasi antara jam kunci (refill 06:00 & 16:00)
-    $anchorAir = [0 => 92.0, 5 => 80.0, 6 => 85.0, 12 => 75.0, 16 => 78.0, 20 => 74.0, 22 => 71.0, 24 => 70.0];
-    $air = 82.0;
-    $prevH = 0;
-    foreach ($anchorAir as $h => $v) {
-        if ($t <= $h) {
-            $span = max(1, $h - $prevH);
-            $air = $anchorAir[$prevH] + (($v - $anchorAir[$prevH]) / $span) * ($t - $prevH);
-            break;
+if (!function_exists('cg_model')) {
+    function cg_model(float $t): array
+    {
+        // Level air: linear interpolasi antara jam kunci (refill 06:00 & 16:00)
+        $anchorAir = [0 => 92.0, 5 => 80.0, 6 => 85.0, 12 => 75.0, 16 => 78.0, 20 => 74.0, 22 => 71.0, 24 => 70.0];
+        $air = 82.0;
+        $prevH = 0;
+        foreach ($anchorAir as $h => $v) {
+            if ($t <= $h) {
+                $span = max(1, $h - $prevH);
+                $air = $anchorAir[$prevH] + (($v - $anchorAir[$prevH]) / $span) * ($t - $prevH);
+                break;
+            }
+            $prevH = $h;
         }
-        $prevH = $h;
+
+        // Suhu: puncak 13:30
+        $suhu = 24.8 + 8.0 * exp(-pow($t - 13.5, 2) / 22);
+        $suhu = max(24.0, min(34.5, $suhu + (mt_rand(-10, 10) / 20)));
+
+        // Kelembaban kebalikan suhu
+        $lembab = max(50.0, min(85.0, 80 - ($suhu - 24.8) * 1.6) + (mt_rand(-8, 8) / 10));
+
+        // Cahaya: 0 di malam, puncak 12:30
+        if ($t < 4.8 || $t > 20.2) {
+            $cahaya = mt_rand(0, 12);
+        } else {
+            $cahaya = max(0, (float) (1800 * exp(-pow($t - 12.5, 2) / 30)) + mt_rand(-60, 60));
+        }
+
+        return [$suhu, $lembab, $cahaya, $air];
     }
-
-    // Suhu: puncak 13:30
-    $suhu = 24.8 + 8.0 * exp(-pow($t - 13.5, 2) / 22);
-    $suhu = max(24.0, min(34.5, $suhu + (mt_rand(-10, 10) / 20)));
-
-    // Kelembaban kebalikan suhu
-    $lembab = max(50.0, min(85.0, 80 - ($suhu - 24.8) * 1.6) + (mt_rand(-8, 8) / 10));
-
-    // Cahaya: 0 di malam, puncak 12:30
-    if ($t < 4.8 || $t > 20.2) {
-        $cahaya = mt_rand(0, 12);
-    } else {
-        $cahaya = max(0, (float) (1800 * exp(-pow($t - 12.5, 2) / 30)) + mt_rand(-60, 60));
-    }
-
-    return [$suhu, $lembab, $cahaya, $air];
 }
 
 $nowTs = time();
@@ -195,7 +199,7 @@ $actuators = $actQuery ? mysqli_fetch_assoc($actQuery) : [
 ];
 
 /* ----------------------------------------------------------------------------
- * Jadwal pakan widget (maks 2 jadwal aktif)
+ * Jadwal pakan widget
  * -------------------------------------------------------------------------- */
 $jadwalQuery = mysqli_query($koneksi, "SELECT * FROM jadwal_pakan ORDER BY waktu ASC");
 $feedSchedules = [];
@@ -226,9 +230,9 @@ if (empty($recentLogs)) {
 }
 
 /* ----------------------------------------------------------------------------
- * Notifikasi
+ * Notifikasi (muat hingga 100 riwayat terbaru)
  * -------------------------------------------------------------------------- */
-$notifQuery = mysqli_query($koneksi, "SELECT * FROM notifikasi ORDER BY id DESC LIMIT 8");
+$notifQuery = mysqli_query($koneksi, "SELECT * FROM notifikasi ORDER BY id DESC LIMIT 100");
 $notifs = [];
 if ($notifQuery) {
     while ($row = mysqli_fetch_assoc($notifQuery)) {
@@ -246,7 +250,7 @@ if (empty($notifs)) {
 
 $unreadQuery = mysqli_query($koneksi, "SELECT COUNT(*) AS unread FROM notifikasi WHERE is_read = 0");
 $unreadRow = $unreadQuery ? mysqli_fetch_assoc($unreadQuery) : null;
-$unreadCount = (int) ($unreadRow['unread'] ?? count($notifs));
+$unreadCount = (int) ($unreadRow['unread'] ?? 0);
 
 /* ----------------------------------------------------------------------------
  * Status kandang
@@ -748,9 +752,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
     </div>
   </div>
 
-
-
-  <!-- Floating Toast Notification -->
+  <!-- Floating Toast Feedback Aksi Dashboard -->
   <div class="dashboard-toast" id="dashToast" role="alert" aria-live="assertive" aria-atomic="true">
     <i class="bi bi-info-circle-fill text-info" id="toastIcon"></i>
     <span id="toastMsg">Pengaturan diperbarui.</span>
@@ -790,7 +792,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
       const toastIcon = document.getElementById("toastIcon");
       let toastTimer = null;
 
-      function showToast(message, type = "success") {
+      window.showToast = function (message, type = "success") {
         if (!toastEl) return;
         toastMsg.textContent = message;
         if (type === "success") {
@@ -805,7 +807,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         toastTimer = setTimeout(() => {
           toastEl.classList.remove("show");
         }, 3200);
-      }
+      };
 
       /* ================= Detailed Sensor Chart ================= */
       const chartCanvas = document.getElementById("sensor24hChart");
@@ -991,7 +993,7 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
 
       /* ================= Log Data Terbaru: sorting + render ================= */
       const logsTbody = document.getElementById("recentLogsTableBody");
-      let sortState = null; // {col, dir}
+      let sortState = null;
 
       function cellSortValue(row, col) {
         const cells = row.querySelectorAll("td");
@@ -1049,44 +1051,181 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         applyTableSort();
       }
 
-      /* ================= Notifikasi ================= */
+      /* ================= Notifikasi State, Dropdown & Bootstrap 5 Toast ================= */
       const notifListContainer = document.getElementById("notifListContainer");
-      const modalNotifList = document.getElementById("modalNotifList");
+      const notifDropdownList = document.getElementById("notifDropdownList");
       const notifDot = document.getElementById("topbarNotifDot");
+      const notifUnreadBadge = document.getElementById("notifUnreadBadge");
+
+      let allNotifs = <?= json_encode($notifs, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+      let unreadNotifCount = <?= (int) $unreadCount ?>;
+      let knownNotifIds = new Set(allNotifs.map(n => Number(n.id)));
 
       function dotClass(tipe, isRead) {
         let cls = tipe === "warning" ? "bg-warning" : (tipe === "danger" ? "bg-danger" : "bg-success");
-        if (isRead == 1) cls += " bg-opacity-50";
+        if (Number(isRead) === 1) cls += " bg-opacity-50";
         return cls;
+      }
+
+      // Dipanggil oleh topbar.php saat tombol "Tandai Semua Dibaca" diklik
+      window.onAllNotifsMarkedRead = function () {
+        allNotifs = allNotifs.map(n => ({ ...n, is_read: 1 }));
+        setUnread(0);
+        renderNotifs(allNotifs);
+      };
+
+      // Tandai satu item notifikasi dibaca
+      async function markSingleNotifAsRead(notifId) {
+        const target = allNotifs.find(n => Number(n.id) === Number(notifId));
+        if (!target || Number(target.is_read) === 1) return;
+
+        try {
+          const res = await fetch("../proses/notifikasi_tandai.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: Number(notifId) })
+          });
+          const data = await res.json();
+          if (data && data.success) {
+            target.is_read = 1;
+            setUnread(typeof data.unread_count !== "undefined" ? data.unread_count : Math.max(0, unreadNotifCount - 1));
+            renderNotifs(allNotifs);
+          }
+        } catch (err) {
+          console.error("Gagal menandai notifikasi dibaca:", err);
+        }
+      }
+
+      // Pop-up Bootstrap 5 Toast Otomatis 4 Detik saat Notifikasi Baru Masuk
+      function showNewNotifToast(item) {
+        const container = document.getElementById("notifToastContainer");
+        if (!container || !window.bootstrap || !window.bootstrap.Toast) return;
+
+        const isWarning = item.tipe === "warning";
+        const isDanger = item.tipe === "danger";
+        const badgeBg = isWarning ? "bg-warning text-dark" : (isDanger ? "bg-danger text-white" : "bg-success text-white");
+        const iconBi = isWarning ? "bi-exclamation-triangle-fill" : (isDanger ? "bi-x-octagon-fill" : "bi-bell-fill");
+
+        const toastEl = document.createElement("div");
+        toastEl.className = "toast border-0 shadow-lg mb-2";
+        toastEl.setAttribute("role", "alert");
+        toastEl.setAttribute("aria-live", "assertive");
+        toastEl.setAttribute("aria-atomic", "true");
+        toastEl.style.borderRadius = "14px";
+        toastEl.style.overflow = "hidden";
+        toastEl.style.cursor = "pointer";
+
+        toastEl.innerHTML = `
+          <div class="toast-header border-0 bg-white pb-1">
+            <span class="badge ${badgeBg} rounded-circle p-1 me-2 d-inline-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+              <i class="bi ${iconBi}" style="font-size: 0.75rem;"></i>
+            </span>
+            <strong class="me-auto text-dark" style="font-size: 0.85rem;">Notifikasi Baru</strong>
+            <small class="text-muted">${escapeHtml(item.waktu_label || "Baru saja")}</small>
+            <button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body bg-white pt-1 text-secondary" style="font-size: 0.84rem;">
+            ${escapeHtml(item.pesan)}
+          </div>
+        `;
+
+        // Klik isi toast -> buka dropdown lonceng, scroll ke atas, dan tandai dibaca
+        toastEl.addEventListener("click", (e) => {
+          if (e.target.closest(".btn-close")) return;
+          e.stopPropagation();
+          if (typeof window.openTopbarNotificationDropdown === "function") {
+            window.openTopbarNotificationDropdown();
+          }
+          if (item.id) {
+            markSingleNotifAsRead(item.id);
+          }
+          bsToast.hide();
+        });
+
+        container.appendChild(toastEl);
+
+        const bsToast = new bootstrap.Toast(toastEl, {
+          autohide: true,
+          delay: 4000
+        });
+
+        toastEl.addEventListener("hidden.bs.toast", () => {
+          toastEl.remove();
+        });
+
+        bsToast.show();
       }
 
       function renderNotifs(notifs) {
         if (!Array.isArray(notifs)) return;
+
+        // 1. Panel Notifikasi Terbaru di Dashboard (4 item terbaru)
         if (notifListContainer) {
           notifListContainer.innerHTML = notifs.slice(0, 4).map(n => `
             <div class="notif-item d-flex gap-2 align-items-start">
               <span class="notif-dot ${dotClass(n.tipe, n.is_read)} mt-1"></span>
               <div>
-                <div class="notif-title" style="${n.is_read == 1 ? 'font-weight:500;color:#64748b' : ''}">${escapeHtml(n.pesan)}</div>
+                <div class="notif-title" style="${Number(n.is_read) === 1 ? 'font-weight:500;color:#64748b' : ''}">${escapeHtml(n.pesan)}</div>
                 <div class="notif-time">${escapeHtml(n.waktu_label)}</div>
               </div>
             </div>`).join("");
         }
-        if (modalNotifList) {
-          modalNotifList.innerHTML = notifs.map(n => `
-            <div class="list-group-item px-0 py-2 border-light d-flex gap-3 align-items-center">
-              <span class="notif-dot ${dotClass(n.tipe, n.is_read)}"></span>
-              <div class="flex-grow-1">
-                <div class="fw-semibold text-dark fs-6">${escapeHtml(n.pesan)}</div>
-                <div class="text-muted small">${escapeHtml(n.waktu_label)}</div>
-              </div>
-              ${n.is_read == 1 ? "" : '<span class="badge bg-success-subtle text-success rounded-pill">Baru</span>'}
-            </div>`).join("");
+
+        // 2. Dropdown Popover di Ikon Lonceng (Seluruh Riwayat Scrollable, terbaru di atas)
+        if (notifDropdownList) {
+          if (notifs.length === 0) {
+            notifDropdownList.innerHTML = `
+              <div class="text-center py-4 text-muted small" id="notifEmptyState">
+                <i class="bi bi-bell-slash fs-2 d-block mb-1 text-secondary opacity-50"></i>
+                Belum ada notifikasi
+              </div>`;
+          } else {
+            notifDropdownList.innerHTML = notifs.map(n => {
+              const isRead = Number(n.is_read) === 1;
+              return `
+                <div class="list-group-item list-group-item-action border-light px-3 py-2 d-flex gap-2 align-items-start notif-dropdown-item ${isRead ? '' : 'bg-success-subtle bg-opacity-10'}"
+                     data-id="${Number(n.id)}"
+                     style="cursor: pointer;">
+                  <span class="notif-dot ${dotClass(n.tipe, n.is_read)} mt-1 flex-shrink-0"
+                        style="width: 9px; height: 9px; border-radius: 50%; display: inline-block;"></span>
+                  <div class="flex-grow-1" style="min-width: 0;">
+                    <div class="notif-item-msg ${isRead ? 'fw-medium text-secondary' : 'fw-semibold text-dark'}" style="font-size: 0.85rem; line-height: 1.35;">
+                      ${escapeHtml(n.pesan)}
+                    </div>
+                    <div class="text-muted mt-1" style="font-size: 0.72rem;">
+                      ${escapeHtml(n.waktu_label)}
+                    </div>
+                  </div>
+                  ${isRead ? '' : '<span class="badge bg-success-subtle text-success rounded-pill flex-shrink-0 notif-new-pill" style="font-size: 0.65rem;">Baru</span>'}
+                </div>`;
+            }).join("");
+          }
         }
       }
 
+      // Klik item di dalam dropdown untuk menandai dibaca
+      if (notifDropdownList) {
+        notifDropdownList.addEventListener("click", (e) => {
+          const itemEl = e.target.closest(".notif-dropdown-item");
+          if (!itemEl) return;
+          const id = Number(itemEl.getAttribute("data-id"));
+          if (id) markSingleNotifAsRead(id);
+        });
+      }
+
       function setUnread(count) {
-        if (notifDot) notifDot.hidden = !(count > 0);
+        unreadNotifCount = Math.max(0, Number(count) || 0);
+        if (notifDot) {
+          if (unreadNotifCount > 0) {
+            notifDot.style.display = "inline-block";
+            notifDot.textContent = unreadNotifCount > 99 ? "99+" : unreadNotifCount;
+          } else {
+            notifDot.style.display = "none";
+          }
+        }
+        if (notifUnreadBadge) {
+          notifUnreadBadge.textContent = `${unreadNotifCount} Baru`;
+        }
       }
 
       function escapeHtml(str) {
@@ -1094,8 +1233,6 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
           .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
           .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
       }
-
-
 
       /* ================= Status Kandang ================= */
       function updateStatusKandang(st) {
@@ -1152,7 +1289,6 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         setMetric("metricCahaya", "statusCahaya", Math.round(Number(sensor.cahaya)), metricStatusCahaya(Number(sensor.cahaya)));
         setMetric("metricAir", "statusAir", Math.round(Number(sensor.level_air)), metricStatusAir(Number(sensor.level_air)));
 
-        // Titik terakhir grafik mengikuti pembacaan terbaru
         if (sensorChart) {
           const s = sensor;
           const len = SENSOR_CHART_DATA.suhu.length;
@@ -1205,21 +1341,53 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
           updateMetrics(data.sensor);
           updateActuatorsUI(data.actuators);
           renderLogs(data.logs);
-          renderNotifs(data.notifications);
-          setUnread(data.unread_count);
+
+          // Sinkronisasi riwayat & deteksi notifikasi baru
+          if (Array.isArray(data.notifications)) {
+            const newlyArrived = [];
+            data.notifications.forEach(incoming => {
+              const id = Number(incoming.id);
+              if (!knownNotifIds.has(id)) {
+                knownNotifIds.add(id);
+                newlyArrived.push(incoming);
+              }
+            });
+
+            // Munculkan Bootstrap 5 Toast selama 4 detik untuk setiap notifikasi baru
+            if (newlyArrived.length > 0) {
+              newlyArrived
+                .sort((a, b) => Number(a.id) - Number(b.id))
+                .forEach(n => showNewNotifToast(n));
+            }
+
+            // Gabungkan riwayat lama & data terbaru lalu urutkan DESC (terbaru paling atas)
+            const mergedMap = new Map();
+            allNotifs.forEach(n => mergedMap.set(Number(n.id), n));
+            data.notifications.forEach(n => mergedMap.set(Number(n.id), n));
+
+            allNotifs = Array.from(mergedMap.values()).sort((a, b) => Number(b.id) - Number(a.id));
+            renderNotifs(allNotifs);
+
+            const unreadTotal = typeof data.unread_count !== "undefined"
+              ? data.unread_count
+              : allNotifs.filter(n => Number(n.is_read) === 0).length;
+            setUnread(unreadTotal);
+          } else {
+            setUnread(data.unread_count ?? 0);
+          }
+
           updateStatusKandang(data.status_kandang);
           lastSensorId = data.sensor.id || lastSensorId;
         } catch (err) {
-          // koneksi gagal: biarkan data terakhir
           console.error("Polling gagal:", err);
         } finally {
           isPolling = false;
         }
       }
 
-      // Polling pertama (menyuntik satu pembacaan jika data sudah lama), lalu tiap 30 detik
-      setTimeout(() => refreshDashboard(true), 2500);
-      setInterval(() => refreshDashboard(true), 30000);
+      // Polling awal lalu refresh real-time tiap 3 detik
+      setTimeout(() => refreshDashboard(false), 1500);
+      setInterval(() => refreshDashboard(false), 3000);
 
       /* ================= Aktuator: toggle AJAX ================= */
       document.querySelectorAll("input[data-actuator]").forEach(toggle => {
@@ -1392,7 +1560,6 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
         });
       });
 
-      // Sidebar "Pengaturan" → scroll + buka modal
       if (window.location.hash === "#pengaturan-section") {
         setTimeout(() => {
           const target = document.getElementById("pengaturan-section");
@@ -1433,4 +1600,3 @@ $statKandang = cg_status_kandang($latestSensor ?: [], $settings);
   </script>
 </body>
 </html>
-
