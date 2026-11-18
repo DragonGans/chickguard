@@ -81,7 +81,7 @@
 }
 
 .actuator-card-grid.is-active .icon-lamp {
-  background: #fef9c3;
+  background: S#fef9c3;
   color: #ca8a04;
   box-shadow: 0 0 16px rgba(250, 204, 21, 0.45);
 }
