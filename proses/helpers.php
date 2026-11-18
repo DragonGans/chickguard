@@ -97,7 +97,7 @@ function cg_status_kandang(array $sensor, array $settings): array
     if ($suhu > $suhuMaks) {
         $tips = 'Suhu tinggi terdeteksi. Aktifkan kipas atau tingkatkan ventilation agar ayam tidak stress.';
     } elseif ($suhu < $suhuMin) {
-        $tips = 'Suhu rendah terdeteksi. Aktifkan heater atau lampu pemanas untuk menjaga suhu kandang.';
+        $tips = 'Suhu rendah terdeteksi. Nyalakan lampu pemanas untuk menjaga suhu kandang.';
     } elseif ($air < $airMin) {
         $tips = 'Level air rendah. Segera lakukan pengisian minum agar ayam tetap terhidrasi.';
     } elseif ($lembap > $lembapMaks) {

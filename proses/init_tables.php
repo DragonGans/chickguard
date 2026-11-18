@@ -52,7 +52,6 @@ function chickguard_init_tables(mysqli $koneksi): void
     mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS actuator_status (
         id INT AUTO_INCREMENT PRIMARY KEY,
         kipas TINYINT(1) NOT NULL DEFAULT 0,
-        heater TINYINT(1) NOT NULL DEFAULT 0,
         lampu TINYINT(1) NOT NULL DEFAULT 0,
         motor_pakan TINYINT(1) NOT NULL DEFAULT 1,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -78,7 +77,6 @@ function chickguard_init_tables(mysqli $koneksi): void
 
     mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS pengaturan_kandang (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        nama_kandang VARCHAR(100) NOT NULL DEFAULT 'Kandang 1 - Utama',
         suhu_min DECIMAL(5,2) NOT NULL DEFAULT 24.0,
         suhu_maks DECIMAL(5,2) NOT NULL DEFAULT 34.0,
         kelembaban_min DECIMAL(5,2) NOT NULL DEFAULT 55.0,
@@ -89,6 +87,8 @@ function chickguard_init_tables(mysqli $koneksi): void
     )");
 
     ensure_log_harian_extra_columns($koneksi);
+    drop_pengaturan_nama_kandang_column($koneksi);
+    drop_actuator_heater_column($koneksi);
     seed_actuator_status($koneksi);
     seed_data_sensor($koneksi);
     seed_log_pemberian_pakan($koneksi);
@@ -124,12 +124,28 @@ function ensure_log_harian_extra_columns(mysqli $koneksi): void
     }
 }
 
+function drop_pengaturan_nama_kandang_column(mysqli $koneksi): void
+{
+    $check = mysqli_query($koneksi, "SHOW COLUMNS FROM pengaturan_kandang LIKE 'nama_kandang'");
+    if ($check && mysqli_num_rows($check) > 0) {
+        mysqli_query($koneksi, "ALTER TABLE pengaturan_kandang DROP COLUMN nama_kandang");
+    }
+}
+
+function drop_actuator_heater_column(mysqli $koneksi): void
+{
+    $check = mysqli_query($koneksi, "SHOW COLUMNS FROM actuator_status LIKE 'heater'");
+    if ($check && mysqli_num_rows($check) > 0) {
+        mysqli_query($koneksi, "ALTER TABLE actuator_status DROP COLUMN heater");
+    }
+}
+
 function seed_actuator_status(mysqli $koneksi): void
 {
     $result = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM actuator_status");
     $row = mysqli_fetch_assoc($result);
     if ((int) ($row['total'] ?? 0) === 0) {
-        mysqli_query($koneksi, "INSERT INTO actuator_status (id, kipas, heater, lampu, motor_pakan) VALUES (1, 0, 0, 0, 1)");
+        mysqli_query($koneksi, "INSERT INTO actuator_status (id, kipas, lampu, motor_pakan) VALUES (1, 0, 0, 1)");
     }
 }
 
@@ -179,7 +195,7 @@ function seed_pengaturan_kandang(mysqli $koneksi): void
     $result = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM pengaturan_kandang");
     $row = mysqli_fetch_assoc($result);
     if ((int) ($row['total'] ?? 0) === 0) {
-        mysqli_query($koneksi, "INSERT INTO pengaturan_kandang (id, nama_kandang, suhu_min, suhu_maks, kelembaban_min, kelembaban_maks, cahaya_min, level_air_min) VALUES (1, 'Kandang 1 - Utama', 24.0, 34.0, 55.0, 75.0, 500, 50.0)");
+        mysqli_query($koneksi, "INSERT INTO pengaturan_kandang (id, suhu_min, suhu_maks, kelembaban_min, kelembaban_maks, cahaya_min, level_air_min) VALUES (1, 24.0, 34.0, 55.0, 75.0, 500, 50.0)");
     }
 }
 

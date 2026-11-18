@@ -83,7 +83,6 @@ if (isset($_GET['simulate'])) {
 // --- Pengaturan / batas normal ---------------------------------------------
 $settingQuery = mysqli_query($koneksi, "SELECT * FROM pengaturan_kandang WHERE id = 1 LIMIT 1");
 $settings = $settingQuery ? mysqli_fetch_assoc($settingQuery) : [
-    'nama_kandang' => 'Kandang 1 - Utama',
     'suhu_min' => 24.0,
     'suhu_maks' => 34.0,
     'kelembaban_min' => 55.0,
@@ -111,7 +110,6 @@ if (!$latestSensor) {
 $actQuery = mysqli_query($koneksi, "SELECT * FROM actuator_status WHERE id = 1 LIMIT 1");
 $actuators = $actQuery ? mysqli_fetch_assoc($actQuery) : [
     'kipas' => 0,
-    'heater' => 0,
     'lampu' => 0,
     'motor_pakan' => 1,
 ];
